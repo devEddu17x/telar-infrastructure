@@ -14,9 +14,8 @@ variable "project_name" {
 }
 
 variable "environment" {
-  description = "Environment identifier for bootstrap resources"
+  description = "Environment identifier: dev, qa, prod"
   type        = string
-  default     = "bootstrap"
 }
 
 variable "state_lock_table_name" {
