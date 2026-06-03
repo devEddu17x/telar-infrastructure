@@ -45,3 +45,5 @@ terraform.rc
 
 node_modules/
 dist/
+
+backend.hcl
