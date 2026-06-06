@@ -43,7 +43,7 @@ variable "cors_configuration" {
     allow_credentials = optional(bool, false)
     allow_headers     = optional(list(string), ["authorization", "content-type"])
     allow_methods     = optional(list(string), ["GET", "POST", "PUT", "DELETE", "OPTIONS"])
-    allow_origins     = optional(list(string), ["*"])
+    allow_origins     = optional(list(string), [])
     expose_headers    = optional(list(string), [])
     max_age           = optional(number, 300)
   })
