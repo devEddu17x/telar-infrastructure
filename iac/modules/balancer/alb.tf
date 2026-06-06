@@ -6,5 +6,11 @@ resource "aws_lb" "alb" {
   subnets                    = var.subnet_ids
   enable_deletion_protection = var.enable_deletion_protection
 
+  access_logs {
+    enabled = true
+    bucket  = var.access_logs_bucket
+    prefix  = var.access_logs_prefix
+  }
+
   tags = var.tags
 }
