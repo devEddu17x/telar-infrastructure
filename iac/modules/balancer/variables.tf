@@ -65,6 +65,17 @@ variable "deregistration_delay" {
   default     = 30
 }
 
+variable "access_logs_bucket" {
+  description = "S3 bucket name for ALB access logs"
+  type        = string
+}
+
+variable "access_logs_prefix" {
+  description = "S3 prefix for ALB access logs"
+  type        = string
+  default     = null
+}
+
 variable "tags" {
   description = "Common tags for this module"
   type        = map(string)
