@@ -1,0 +1,5 @@
+aws_region  = "us-east-1"
+aws_profile = "your-aws-profile"
+
+project_name = "your-project-name"
+environment  = "dev"
