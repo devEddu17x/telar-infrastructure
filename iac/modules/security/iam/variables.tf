@@ -1,30 +1,28 @@
-variable "project_name" {
-  description = "Nombre del proyecto, utilizado como prefijo para los recursos"
+variable "name_prefix" {
+  description = "Project-environment prefix used to name all IAM resources (e.g. 'telar-saas-dev')"
   type        = string
-  default     = "telar-saas"
 }
 
 variable "secrets_manager_arns" {
-  description = "Lista de ARNs de secretos en Secrets Manager a los que el Execution Role tendrá acceso"
-  type        = list(string) #Ahora se usa list para manejar múltiples secretos
-  default     = ["*"] # Cambiar por ARNs especifico
+  description = "List of Secrets Manager secret ARNs the ECS Execution Role is allowed to read at container startup"
+  type        = list(string)
+  default     = ["*"]
 }
 
 variable "ssm_parameter_arns" {
-  description = "Lista de ARNs de parámetros en SSM Parameter Store a los que el Execution Role tendrá acceso"
+  description = "List of SSM Parameter Store parameter ARNs the ECS Execution Role is allowed to read at container startup"
   type        = list(string)
-  default     = ["*"] # Cambiar
+  default     = ["*"]
 }
 
 variable "s3_bucket_arns" {
-  description = "Lista de ARNs de buckets S3 a los que el Task Role tendrá acceso"
+  description = "List of S3 bucket ARNs the ECS Task Role is allowed to read from and write to"
   type        = list(string)
-  default     = ["*"] # Cambiar
+  default     = ["*"]
 }
 
 variable "cognito_user_pool_arn" {
-  description = "ARN del User Pool de Cognito. Requerido para que el backend pueda administrar usuarios (crear, listar, actualizar)."
+  description = "ARN of the Cognito User Pool the ECS Task Role and Lambda are allowed to administer"
   type        = string
-  default     = "*" # Cambiar
+  default     = "*"
 }
-

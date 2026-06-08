@@ -1,5 +1,5 @@
 resource "aws_iam_role" "ecs_task_role" {
-  name               = "${var.project_name}-ecs-task-role"
+  name               = "${var.name_prefix}-ecs-task-role"
   assume_role_policy = data.aws_iam_policy_document.ecs_tasks_trust_policy.json
 }
 
@@ -60,7 +60,7 @@ data "aws_iam_policy_document" "ecs_task_policy" {
 }
 
 resource "aws_iam_role_policy" "ecs_task" {
-  name   = "${var.project_name}-ecs-task-policy"
+  name   = "${var.name_prefix}-ecs-task-policy"
   role   = aws_iam_role.ecs_task_role.id
   policy = data.aws_iam_policy_document.ecs_task_policy.json
 }

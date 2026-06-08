@@ -1,5 +1,5 @@
 resource "aws_iam_role" "ecs_execution_role" {
-  name               = "${var.project_name}-ecs-execution-role"
+  name               = "${var.name_prefix}-ecs-execution-role"
   assume_role_policy = data.aws_iam_policy_document.ecs_tasks_trust_policy.json
 }
 
@@ -31,7 +31,7 @@ data "aws_iam_policy_document" "ecs_execution_secrets_policy" {
 }
 
 resource "aws_iam_role_policy" "ecs_execution_secrets" {
-  name   = "${var.project_name}-ecs-execution-secrets-policy"
+  name   = "${var.name_prefix}-ecs-execution-secrets-policy"
   role   = aws_iam_role.ecs_execution_role.id
   policy = data.aws_iam_policy_document.ecs_execution_secrets_policy.json
 }

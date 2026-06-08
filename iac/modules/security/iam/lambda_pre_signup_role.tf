@@ -10,7 +10,7 @@ data "aws_iam_policy_document" "lambda_trust_policy" {
 }
 
 resource "aws_iam_role" "lambda_pre_signup_role" {
-  name               = "${var.project_name}-lambda-pre-signup-role"
+  name               = "${var.name_prefix}-lambda-pre-signup-role"
   assume_role_policy = data.aws_iam_policy_document.lambda_trust_policy.json
 }
 
@@ -42,7 +42,7 @@ data "aws_iam_policy_document" "lambda_pre_signup_policy" {
 }
 
 resource "aws_iam_role_policy" "lambda_pre_signup" {
-  name   = "${var.project_name}-lambda-pre-signup-policy"
+  name   = "${var.name_prefix}-lambda-pre-signup-policy"
   role   = aws_iam_role.lambda_pre_signup_role.id
   policy = data.aws_iam_policy_document.lambda_pre_signup_policy.json
 }
