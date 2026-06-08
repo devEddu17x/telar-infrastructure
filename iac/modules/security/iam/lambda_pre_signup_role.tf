@@ -26,7 +26,7 @@ data "aws_iam_policy_document" "lambda_pre_signup_policy" {
     actions = [
       "secretsmanager:GetSecretValue",
     ]
-    resources = var.secrets_manager_arns
+    resources = var.lambda_pre_signup_secrets_manager_arns
   }
 
   statement {

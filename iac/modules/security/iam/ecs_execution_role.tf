@@ -15,7 +15,7 @@ data "aws_iam_policy_document" "ecs_execution_secrets_policy" {
     actions = [
       "secretsmanager:GetSecretValue",
     ]
-    resources = var.secrets_manager_arns
+    resources = var.ecs_execution_secrets_manager_arns
   }
 
   statement {
