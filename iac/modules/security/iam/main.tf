@@ -43,3 +43,49 @@ resource "aws_iam_role_policy" "ecs_execution_secrets" {
   role   = aws_iam_role.ecs_execution_role.id
   policy = data.aws_iam_policy_document.ecs_execution_secrets_policy.json
 }
+
+resource "aws_iam_role" "ecs_task_role" {
+  name               = "${var.project_name}-ecs-task-role"
+  assume_role_policy = data.aws_iam_policy_document.ecs_tasks_trust_policy.json
+
+}
+
+data "aws_iam_policy_document" "ecs_task_policy" {
+  # Acceso a S3 
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:PutObject",
+      "s3:GetObject",
+      "s3:ListBucket",
+      "s3:DeleteObject"
+    ]
+    resources = [
+      var.s3_bucket_arn,
+      "${var.s3_bucket_arn}/*"
+    ]
+  }
+
+
+  # Acceso a AWS X-Ray
+  statement {
+    effect = "Allow"
+    actions = [
+      "xray:PutTraceSegments",
+      "xray:PutTelemetryRecords",
+      "xray:GetSamplingRules",
+      "xray:GetSamplingTargets",
+      "xray:GetSamplingStatisticSummaries"
+    ]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_role_policy" "ecs_task" {
+  name   = "${var.project_name}-ecs-task-policy"
+  role   = aws_iam_role.ecs_task_role.id
+  policy = data.aws_iam_policy_document.ecs_task_policy.json
+}
+
+
+
