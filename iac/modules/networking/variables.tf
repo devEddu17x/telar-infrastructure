@@ -10,7 +10,7 @@ variable "vpc_cidr" {
   default     = "10.0.0.0/16"
 
   validation {
-    condition     = can(cidrhost(var.vpc_cidr, 0))
+    condition     = can(cidrnetmask(var.vpc_cidr))
     error_message = "vpc_cidr must be a valid IPv4 CIDR block (e.g. '10.0.0.0/16')."
   }
 }
@@ -19,10 +19,10 @@ variable "availability_zones" {
   description = "List of Availability Zones to deploy subnets into. First AZ is treated as principal, rest as replicas."
   type        = list(string)
   default     = ["us-east-1a", "us-east-1b"]
-
+ 
   validation {
-    condition     = length(var.availability_zones) >= 2
-    error_message = "At least two Availability Zones are required for high availability."
+    condition     = length(var.availability_zones) >= 2 && length(distinct(var.availability_zones)) == length(var.availability_zones)
+    error_message = "At least two distinct Availability Zones are required for high availability."
   }
 }
 
@@ -32,8 +32,12 @@ variable "subnet_newbits" {
   default     = 8
 
   validation {
-    condition     = var.subnet_newbits > 0
-    error_message = "subnet_newbits must be greater than 0."
+    condition = (
+      var.subnet_newbits > 0 &&
+      var.subnet_newbits == floor(var.subnet_newbits) &&
+      pow(2, var.subnet_newbits) >= (3 * length(var.availability_zones))
+    )
+    error_message = "subnet_newbits must be a positive integer providing enough capacity for cidrsubnet to allocate 3 subnets per AZ across all var.availability_zones (minimum 2^var.subnet_newbits >= 3 * length(var.availability_zones))."
   }
 }
 

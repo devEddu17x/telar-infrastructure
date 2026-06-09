@@ -31,7 +31,7 @@ resource "aws_security_group" "alb" {
     Name = "${var.name_prefix}-alb-sg"
   })
 }
-#esto de las ips cuidao
+
 resource "aws_security_group" "ecs_tasks" {
   name        = "${var.name_prefix}-ecs-tasks-sg"
   description = "Security group for ECS Fargate tasks"
