@@ -22,7 +22,7 @@ resource "aws_rds_cluster_instance" "writer" {
 }
 
 resource "aws_rds_cluster_instance" "readers" {
-  count = var.reader_count
+  count = var.auto_scaling_enabled ? var.auto_scaling_min_readers : var.reader_count
 
   identifier         = "${var.name_prefix}-aurora-reader-${count.index + 1}"
   cluster_identifier = aws_rds_cluster.this.id

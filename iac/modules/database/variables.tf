@@ -62,6 +62,37 @@ variable "reader_count" {
   default     = 1
 }
 
+# Auto Scaling
+variable "auto_scaling_enabled" {
+  description = "Enable Aurora Auto Scaling for read replicas"
+  type        = bool
+  default     = false
+}
+
+variable "auto_scaling_min_readers" {
+  description = "Minimum number of read replicas when auto-scaling is enabled"
+  type        = number
+  default     = 1
+}
+
+variable "auto_scaling_max_readers" {
+  description = "Maximum number of read replicas when auto-scaling is enabled"
+  type        = number
+  default     = 3
+}
+
+variable "auto_scaling_cpu_target" {
+  description = "Target average CPU utilization percentage for auto-scaling"
+  type        = number
+  default     = 70
+}
+
+variable "auto_scaling_connections_target" {
+  description = "Target average database connections per vCPU for auto-scaling"
+  type        = number
+  default     = 100
+}
+
 # Encryption
 variable "kms_key_id" {
   description = "ARN of the KMS key for storage encryption. Defaults to AWS-managed key if null"
