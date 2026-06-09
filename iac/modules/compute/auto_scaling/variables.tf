@@ -38,5 +38,3 @@ variable "target" {
   type        = number
   default     = 70
 }
-
-
