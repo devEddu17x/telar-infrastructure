@@ -1,0 +1,10 @@
+{
+  "name": "cognito-pre-sign-up",
+  "version": "1.0.0",
+  "description": "Pre-sign-up Lambda trigger for Cognito — validates backend internal secret",
+  "type": "commonjs",
+  "main": "index.js",
+  "engines": {
+    "node": ">=20"
+  }
+}
