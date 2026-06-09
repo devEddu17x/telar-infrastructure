@@ -1,6 +1,23 @@
 "use strict";
 
+const crypto = require("crypto");
+
 const INTERNAL_SECRET_KEY = "x-internal-secret";
+
+/**
+ * Compara dos cadenas en tiempo constante para prevenir ataques de tiempo.
+ * @param {string} a
+ * @param {string} b
+ * @returns {boolean}
+ */
+function safeCompare(a, b) {
+  const aBuf = Buffer.from(a);
+  const bBuf = Buffer.from(b);
+  if (aBuf.length !== bBuf.length) {
+    return false;
+  }
+  return crypto.timingSafeEqual(aBuf, bBuf);
+}
 
 /**
  * @param {import('aws-lambda').PreSignUpTriggerEvent} event
@@ -22,7 +39,7 @@ exports.handler = async (event) => {
     throw new Error("Unauthorized: missing internal secret");
   }
 
-  if (receivedSecret !== expectedSecret) {
+  if (!safeCompare(receivedSecret, expectedSecret)) {
     console.warn("[pre-sign-up] Rejected: internal secret mismatch");
     throw new Error("Unauthorized: invalid internal secret");
   }
