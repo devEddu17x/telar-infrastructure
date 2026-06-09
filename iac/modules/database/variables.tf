@@ -73,12 +73,22 @@ variable "auto_scaling_min_readers" {
   description = "Minimum number of read replicas when auto-scaling is enabled"
   type        = number
   default     = 1
+
+  validation {
+    condition     = var.auto_scaling_min_readers >= 0
+    error_message = "auto_scaling_min_readers must be greater than or equal to 0."
+  }
 }
 
 variable "auto_scaling_max_readers" {
   description = "Maximum number of read replicas when auto-scaling is enabled"
   type        = number
   default     = 3
+
+  validation {
+    condition     = var.auto_scaling_max_readers >= 0 && var.auto_scaling_max_readers >= var.auto_scaling_min_readers
+    error_message = "auto_scaling_max_readers must be greater than or equal to auto_scaling_min_readers and >= 0."
+  }
 }
 
 variable "auto_scaling_cpu_target" {
@@ -105,6 +115,11 @@ variable "backup_retention_period" {
   description = "Days to retain automated backups (1-35)"
   type        = number
   default     = 7
+
+  validation {
+    condition     = var.backup_retention_period >= 1 && var.backup_retention_period <= 35
+    error_message = "backup_retention_period must be between 1 and 35 days."
+  }
 }
 
 variable "preferred_backup_window" {
@@ -149,12 +164,22 @@ variable "performance_insights_retention_period" {
   description = "Retention period for Performance Insights data in days (7 or 731)"
   type        = number
   default     = 7
+
+  validation {
+    condition     = contains([7, 731], var.performance_insights_retention_period)
+    error_message = "performance_insights_retention_period must be either 7 or 731."
+  }
 }
 
 variable "monitoring_interval" {
   description = "Enhanced monitoring interval in seconds (0 to disable, or 1/5/10/15/30/60)"
   type        = number
   default     = 0
+
+  validation {
+    condition     = contains([0, 1, 5, 10, 15, 30, 60], var.monitoring_interval)
+    error_message = "monitoring_interval must be one of: 0, 1, 5, 10, 15, 30, 60."
+  }
 }
 
 variable "monitoring_role_arn" {

@@ -6,13 +6,14 @@ resource "aws_rds_cluster_instance" "writer" {
   engine_version     = aws_rds_cluster.this.engine_version
 
   db_subnet_group_name    = aws_db_subnet_group.this.name
-  db_parameter_group_name = aws_rds_cluster_parameter_group.this.name
+  db_parameter_group_name = aws_db_parameter_group.this.name
 
   availability_zone          = var.availability_zones[0]
   publicly_accessible        = false
   auto_minor_version_upgrade = var.auto_minor_version_upgrade
 
   performance_insights_enabled          = var.performance_insights_enabled
+  performance_insights_kms_key_id       = var.performance_insights_enabled ? var.kms_key_id : null
   performance_insights_retention_period = var.performance_insights_enabled ? var.performance_insights_retention_period : null
 
   monitoring_interval = var.monitoring_interval
@@ -31,7 +32,7 @@ resource "aws_rds_cluster_instance" "readers" {
   engine_version     = aws_rds_cluster.this.engine_version
 
   db_subnet_group_name    = aws_db_subnet_group.this.name
-  db_parameter_group_name = aws_rds_cluster_parameter_group.this.name
+  db_parameter_group_name = aws_db_parameter_group.this.name
 
   # Distribute readers across AZs
   availability_zone          = var.availability_zones[count.index % length(var.availability_zones)]
@@ -39,6 +40,7 @@ resource "aws_rds_cluster_instance" "readers" {
   auto_minor_version_upgrade = var.auto_minor_version_upgrade
 
   performance_insights_enabled          = var.performance_insights_enabled
+  performance_insights_kms_key_id       = var.performance_insights_enabled ? var.kms_key_id : null
   performance_insights_retention_period = var.performance_insights_enabled ? var.performance_insights_retention_period : null
 
   monitoring_interval = var.monitoring_interval

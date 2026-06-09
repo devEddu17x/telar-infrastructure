@@ -14,3 +14,11 @@ resource "aws_rds_cluster_parameter_group" "this" {
 
   tags = var.tags
 }
+
+resource "aws_db_parameter_group" "this" {
+  name        = "${var.name_prefix}-aurora-instance-pg"
+  family      = var.parameter_group_family
+  description = "Instance parameter group for Aurora PostgreSQL ${var.name_prefix}"
+
+  tags = var.tags
+}

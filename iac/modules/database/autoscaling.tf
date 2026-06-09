@@ -1,40 +1,35 @@
-resource "aws_appautoscaling_target" "aurora_readers" {
-  count = var.auto_scaling_enabled ? 1 : 0
-
-  max_capacity       = var.auto_scaling_max_readers
-  min_capacity       = var.auto_scaling_min_readers
-  resource_id        = "cluster:${aws_rds_cluster.this.cluster_identifier}"
-  scalable_dimension = "rds:cluster:ReadReplicaCount"
-  service_namespace  = "rds"
+resource "terraform_data" "validate_auto_scaling" {
+  lifecycle {
+    precondition {
+      condition     = var.auto_scaling_min_readers <= var.auto_scaling_max_readers
+      error_message = "auto_scaling_min_readers must be less than or equal to auto_scaling_max_readers."
+    }
+  }
 }
 
-resource "aws_appautoscaling_policy" "aurora_cpu" {
-  count = var.auto_scaling_enabled ? 1 : 0
+module "auto_scaling_cpu" {
+  count  = var.auto_scaling_enabled ? 1 : 0
+  source = "../compute/auto_scaling"
 
-  name               = "${var.name_prefix}-aurora-cpu-target"
-  policy_type        = "TargetTrackingScaling"
-  resource_id        = aws_appautoscaling_target.aurora_readers[0].resource_id
-  scalable_dimension = aws_appautoscaling_target.aurora_readers[0].scalable_dimension
-  service_namespace  = aws_appautoscaling_target.aurora_readers[0].service_namespace
-
-  target_tracking_scaling_policy_configuration {
-    predefined_metric_specification {
-      predefined_metric_type = "RDSReaderAverageCPUUtilization"
-    }
-    target_value       = var.auto_scaling_cpu_target
-    scale_in_cooldown  = 300
-    scale_out_cooldown = 300
-  }
+  namespace   = "rds"
+  dimension   = "rds:cluster:ReadReplicaCount"
+  resource    = "cluster:${aws_rds_cluster.this.cluster_identifier}"
+  metric_type = "RDSReaderAverageCPUUtilization"
+  min         = var.auto_scaling_min_readers
+  max         = var.auto_scaling_max_readers
+  target      = var.auto_scaling_cpu_target
 }
 
 resource "aws_appautoscaling_policy" "aurora_connections" {
   count = var.auto_scaling_enabled ? 1 : 0
 
+  depends_on = [module.auto_scaling_cpu]
+
   name               = "${var.name_prefix}-aurora-connections-target"
   policy_type        = "TargetTrackingScaling"
-  resource_id        = aws_appautoscaling_target.aurora_readers[0].resource_id
-  scalable_dimension = aws_appautoscaling_target.aurora_readers[0].scalable_dimension
-  service_namespace  = aws_appautoscaling_target.aurora_readers[0].service_namespace
+  resource_id        = "cluster:${aws_rds_cluster.this.cluster_identifier}"
+  scalable_dimension = "rds:cluster:ReadReplicaCount"
+  service_namespace  = "rds"
 
   target_tracking_scaling_policy_configuration {
     predefined_metric_specification {
