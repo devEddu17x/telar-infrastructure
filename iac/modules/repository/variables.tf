@@ -42,3 +42,9 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "allowed_principal_arns" {
+  description = "List of IAM principal ARNs allowed to pull from this repository (cross-account). Leave empty to skip repository policy."
+  type        = list(string)
+  default     = []
+}
