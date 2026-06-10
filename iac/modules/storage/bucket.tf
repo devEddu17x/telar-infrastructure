@@ -1,6 +1,16 @@
 resource "aws_s3_bucket" "this" {
-  bucket        = "${var.name_prefix}-${var.bucket_name_suffix}"
+  bucket        = "${var.name_prefix}-${var.bucket_suffix}"
   force_destroy = var.force_destroy
 
   tags = var.tags
+}
+
+#logging
+
+resource "aws_s3_bucket_logging" "this" {
+  count = var.logging_target_bucket != null ? 1 : 0
+
+  bucket        = aws_s3_bucket.this.id
+  target_bucket = var.logging_target_bucket
+  target_prefix = var.logging_target_prefix
 }
