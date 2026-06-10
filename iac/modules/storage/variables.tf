@@ -77,3 +77,16 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+#logging
+variable "logging_target_bucket" {
+  description = "Nombre del bucket S3 de destino donde se guardarán los logs de acceso. Si es null, se desactiva el logging."
+  type        = string
+  default     = null
+}
+
+variable "logging_target_prefix" {
+  description = "Prefijo para los objetos de log grabados (ej. log/)"
+  type        = string
+  default     = "log/"
+}
