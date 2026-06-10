@@ -117,3 +117,21 @@ resource "aws_security_group" "aurora" {
     Name = "${var.name_prefix}-aurora-sg"
   })
 }
+
+resource "aws_security_group" "vpc_endpoints" {
+  name        = "${var.name_prefix}-vpc-endpoints-sg"
+  description = "Security group for VPC Endpoints"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    description = "Allow HTTPS from VPC"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = [var.vpc_cidr]
+  }
+
+  tags = merge(var.tags, {
+    Name = "${var.name_prefix}-vpc-endpoints-sg"
+  })
+}
