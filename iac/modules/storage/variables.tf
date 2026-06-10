@@ -51,3 +51,29 @@ variable "restrict_public_buckets" {
   type        = bool
   default     = true
 }
+
+# encryption
+variable "kms_key_arn" {
+  description = "ARN de la llave KMS para cifrado. Si es null, usa AES256 por defecto de S3"
+  type        = string
+  default     = null
+}
+
+#cors
+variable "cors_rules" {
+  description = "Lista de reglas CORS para aplicar al bucket"
+  type = list(object({
+    allowed_headers = optional(list(string))
+    allowed_methods = list(string)
+    allowed_origins = list(string)
+    expose_headers  = optional(list(string))
+    max_age_seconds = optional(number)
+  }))
+  default = []
+}
+
+variable "tags" {
+  description = "Etiquetas a aplicar al bucket S3"
+  type        = map(string)
+  default     = {}
+}
