@@ -1,64 +1,70 @@
-variable "name_prefix" {
-  description = "Prefix used for naming all networking resources (e.g. 'telar-dev')"
+variable "region" {
+  description = "AWS region"
   type        = string
-  default     = "networking-telar"
 }
 
+variable "name_prefix" {
+  description = "Project-environment prefix for resources"
+  type        = string
+}
 variable "vpc_cidr" {
-  description = "CIDR block for the VPC."
+  description = "CIDR block for the VPC"
   type        = string
   default     = "10.0.0.0/16"
 
   validation {
     condition     = can(cidrnetmask(var.vpc_cidr))
-    error_message = "vpc_cidr must be a valid IPv4 CIDR block (e.g. '10.0.0.0/16')."
+    error_message = "vpc_cidr must be a valid IPv4 CIDR block"
   }
 }
 
 variable "availability_zones" {
-  description = "List of Availability Zones to deploy subnets into. First AZ is treated as principal, rest as replicas."
+  description = "List of exactly two Availability Zones, first as principal and second as replica"
   type        = list(string)
-  default     = ["us-east-1a", "us-east-1b"]
- 
+  default     = ["us-east-1c", "us-east-1d"]
+
   validation {
-    condition     = length(var.availability_zones) >= 2 && length(distinct(var.availability_zones)) == length(var.availability_zones)
-    error_message = "At least two distinct Availability Zones are required for high availability."
+    condition     = length(distinct(var.availability_zones)) == 2
+    error_message = "Exactly two distinct Availability Zones are required"
   }
 }
 
-variable "subnet_newbits" {
-  description = "Number of additional bits to extend the VPC CIDR for each subnet."
-  type        = number
-  default     = 8
+variable "compute_subnet_cidrs" {
+  description = "Map of AZ to CIDR for compute subnets"
+  type        = map(string)
+  default = {
+    "us-east-1c" = "10.0.0.0/24"
+    "us-east-1d" = "10.0.1.0/24"
+  }
 
   validation {
-    condition = (
-      var.subnet_newbits > 0 &&
-      var.subnet_newbits == floor(var.subnet_newbits) &&
-      pow(2, var.subnet_newbits) >= (3 * length(var.availability_zones))
-    )
-    error_message = "subnet_newbits must be a positive integer providing enough capacity for cidrsubnet to allocate 3 subnets per AZ across all var.availability_zones (minimum 2^var.subnet_newbits >= 3 * length(var.availability_zones))."
+    condition     = length(var.compute_subnet_cidrs) == 2
+    error_message = "compute_subnet_cidrs must contain exactly two entries"
+  }
+}
+
+variable "persistence_subnet_cidrs" {
+  description = "Map of AZ to CIDR for persistence subnets"
+  type        = map(string)
+  default = {
+    "us-east-1c" = "10.0.2.0/24"
+    "us-east-1d" = "10.0.3.0/24"
+  }
+
+  validation {
+    condition     = length(var.persistence_subnet_cidrs) == 2
+    error_message = "persistence_subnet_cidrs must contain exactly two entries"
   }
 }
 
 variable "ecs_container_port" {
   description = "Port exposed by ECS Fargate containers that the ALB will forward traffic to"
   type        = number
-  default     = 8080
-
-  validation {
-    condition     = var.ecs_container_port >= 1 && var.ecs_container_port <= 65535
-    error_message = "ecs_container_port must be a valid port number between 1 and 65535."
-  }
+  default     = 3000
 }
 
 variable "tags" {
   description = "Common tags applied to all networking resources"
   type        = map(string)
   default     = {}
-}
-
-variable "region" {
-  description = "AWS region"
-  type        = string
 }
