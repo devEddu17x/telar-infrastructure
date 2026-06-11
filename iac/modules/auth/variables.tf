@@ -7,8 +7,3 @@ variable "app_email_subject" {
   type        = string
   default     = "telar-saas"
 }
-
-variable "pre_signup_lambda_arn" {
-  description = "ARN of the Lambda function to invoke before user sign up"
-  type        = string
-}
