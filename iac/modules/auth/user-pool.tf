@@ -33,7 +33,4 @@ resource "aws_cognito_user_pool" "pool" {
     attribute_data_type = "String"
   }
 
-  lambda_config {
-    pre_sign_up = var.pre_signup_lambda_arn
-  }
 }
