@@ -8,19 +8,14 @@ output "vpc_cidr_block" {
   value       = aws_vpc.main.cidr_block
 }
 
-output "public_subnet_ids" {
-  description = "List of public subnet IDs (one per AZ) – used by the ALB"
-  value       = [for s in aws_subnet.public : s.id]
-}
-
 output "private_compute_subnet_ids" {
-  description = "List of private compute subnet IDs (one per AZ) – used by ECS/Fargate tasks"
-  value       = [for s in aws_subnet.private_compute : s.id]
+  description = "List of private compute subnet IDs"
+  value       = [for s in aws_subnet.compute : s.id]
 }
 
 output "private_persistence_subnet_ids" {
-  description = "List of private persistence subnet IDs (one per AZ) – used by Aurora"
-  value       = [for s in aws_subnet.private_persistence : s.id]
+  description = "List of private persistence subnet IDs"
+  value       = [for s in aws_subnet.persistence : s.id]
 }
 
 output "alb_security_group_id" {
@@ -42,9 +37,3 @@ output "aurora_security_group_id" {
   description = "Security Group ID for Aurora cluster"
   value       = aws_security_group.aurora.id
 }
-
-output "internet_gateway_id" {
-  description = "ID of the Internet Gateway"
-  value       = aws_internet_gateway.main.id
-}
-
