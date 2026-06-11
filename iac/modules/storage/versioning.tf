@@ -5,4 +5,3 @@ resource "aws_s3_bucket_versioning" "this" {
     status = var.versioning_enabled ? "Enabled" : "Suspended"
   }
 }
-# ojo:sin versiones pero controlado a través de una variable
