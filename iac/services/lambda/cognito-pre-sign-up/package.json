@@ -1,0 +1,10 @@
+{
+    "name": "cognito-pre-sign-up",
+    "version": "1.0.0",
+    "description": "Cognito Pre Sign-Up Lambda trigger",
+    "main": "index.mjs",
+    "type": "module",
+    "dependencies": {
+        "@aws-sdk/client-secrets-manager": "^3.0.0"
+    }
+}
