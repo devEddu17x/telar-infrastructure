@@ -9,3 +9,9 @@ module "networking" {
   ecs_container_port       = var.ecs_container_port
   tags                     = local.default_tags
 }
+
+module "auth" {
+  source            = "../../modules/auth"
+  name_prefix       = local.name_prefix
+  app_email_subject = var.project_name
+}
