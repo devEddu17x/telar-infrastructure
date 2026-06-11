@@ -1,51 +1,27 @@
-resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.main.id
+resource "aws_route_table" "compute" {
+  for_each = toset(var.availability_zones)
+  vpc_id   = aws_vpc.main.id
 
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.main.id
-  }
-
-  tags = merge(var.tags, {
-    Name = "${var.name_prefix}-public-rt"
-  })
+  tags = var.tags
 }
 
-resource "aws_route_table_association" "public" {
-  for_each = aws_subnet.public
+resource "aws_route_table_association" "compute" {
+  for_each = aws_subnet.compute
 
   subnet_id      = each.value.id
-  route_table_id = aws_route_table.public.id
+  route_table_id = aws_route_table.compute[each.key].id
 }
 
-resource "aws_route_table" "private_compute" {
-  for_each = { for az in var.availability_zones : az => az }
+resource "aws_route_table" "persistence" {
+  for_each = toset(var.availability_zones)
+  vpc_id   = aws_vpc.main.id
 
-  vpc_id = aws_vpc.main.id
-
-  tags = merge(var.tags, {
-    Name = "${var.name_prefix}-private-compute-rt-${each.key}"
-  })
+  tags = var.tags
 }
 
-resource "aws_route_table_association" "private_compute" {
-  for_each = aws_subnet.private_compute
+resource "aws_route_table_association" "persistence" {
+  for_each = aws_subnet.persistence
 
   subnet_id      = each.value.id
-  route_table_id = aws_route_table.private_compute[each.key].id
-}
-
-resource "aws_route_table" "private_persistence" {
-  vpc_id = aws_vpc.main.id
-
-  tags = merge(var.tags, {
-    Name = "${var.name_prefix}-private-persistence-rt"
-  })
-}
-
-resource "aws_route_table_association" "private_persistence" {
-  for_each = aws_subnet.private_persistence
-
-  subnet_id      = each.value.id
-  route_table_id = aws_route_table.private_persistence.id
+  route_table_id = aws_route_table.persistence[each.key].id
 }
