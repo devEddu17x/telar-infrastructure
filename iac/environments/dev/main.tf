@@ -15,3 +15,13 @@ module "auth" {
   name_prefix       = local.name_prefix
   app_email_subject = var.project_name
 }
+
+module "storage_images" {
+  source             = "../../modules/storage"
+  name_prefix        = local.name_prefix
+  bucket_suffix      = "images"
+  force_destroy      = var.s3_images_force_destroy
+  cors               = var.s3_images_cors
+  versioning_enabled = var.s3_images_versioning_enabled
+  tags               = local.default_tags
+}
