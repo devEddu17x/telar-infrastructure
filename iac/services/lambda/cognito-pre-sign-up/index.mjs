@@ -10,7 +10,7 @@ export const handler = async (event) => {
   const incomingSecret = event.request?.clientMetadata?.AWS_COGNITO_INTERNAL_AUTH_TOKEN;
 
   if (!incomingSecret) {
-    throw new Error("Unauthorized: missing registrationSecret in clientMetadata");
+    throw new Error("Unauthorized: missing token");
   }
 
   const command = new GetSecretValueCommand({ SecretId: secretArn });
@@ -18,7 +18,7 @@ export const handler = async (event) => {
   const expectedSecret = response.SecretString;
 
   if (incomingSecret !== expectedSecret) {
-    throw new Error("Unauthorized: invalid registrationSecret");
+    throw new Error("Unauthorized: invalid token");
   }
 
   return event;
