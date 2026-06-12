@@ -33,4 +33,7 @@ resource "aws_cognito_user_pool" "pool" {
     attribute_data_type = "String"
   }
 
+  lifecycle {
+    ignore_changes = [schema]
+  }
 }
