@@ -63,3 +63,37 @@ variable "s3_images_versioning_enabled" {
   description = "Enable object versioning for the images bucket"
   type        = bool
 }
+
+variable "firewall_rate_limits" {
+  description = "Each entry creates one rule and one regex pattern set."
+  type = list(object({
+    name           = string
+    limit          = number
+    regex_patterns = list(string)
+  }))
+  default = []
+}
+
+variable "firewall_cloudwatch_metrics_enabled" {
+  description = "Enable CloudWatch metrics"
+  type        = bool
+  default     = true
+}
+
+variable "firewall_sampled_requests_enabled" {
+  description = "Enable sampled requests logging"
+  type        = bool
+  default     = true
+}
+
+variable "firewall_log_destination_arns" {
+  description = "ARNs of WAF logging destinations"
+  type        = list(string)
+  default     = []
+}
+
+variable "firewall_redacted_fields" {
+  description = "HTTP header names to redact from WAF logs"
+  type        = list(string)
+  default     = []
+}
