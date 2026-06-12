@@ -44,3 +44,22 @@ variable "ecs_container_port" {
   description = "Port exposed by ECS Fargate containers"
   type        = number
 }
+variable "s3_images_force_destroy" {
+  description = "Allow bucket destruction even if it contains objects"
+  type        = bool
+}
+variable "s3_images_cors" {
+  description = "CORS configuration for the images bucket"
+  type = object({
+    enabled         = optional(bool, true)
+    allowed_headers = optional(list(string), ["*"])
+    allowed_methods = optional(list(string), ["GET", "PUT", "POST", "DELETE"])
+    allowed_origins = list(string)
+    max_age_seconds = optional(number, 3000)
+  })
+}
+
+variable "s3_images_versioning_enabled" {
+  description = "Enable object versioning for the images bucket"
+  type        = bool
+}
