@@ -25,4 +25,14 @@ s3_images_cors = {
 }
 
 s3_images_versioning_enabled    = true or false
-s3_images_logging_target_bucket = null 
+
+firewall_rate_limits = [{
+  name           = "rate_limit_name"
+  limit          = 50
+  regex_patterns = [".*/path/to/endpoint"]
+}]
+
+firewall_cloudwatch_metrics_enabled = false
+firewall_sampled_requests_enabled   = false
+firewall_redacted_fields            = ["authorization"]
+firewall_log_destination_arns       = []
