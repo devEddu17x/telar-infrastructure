@@ -1,22 +1,16 @@
-resource "aws_wafv2_web_acl_rule" "common_rule_set" {
-  name        = "aws-managed-common-rule-set"
-  priority    = 1
-  web_acl_arn = aws_wafv2_web_acl.main.arn
+resource "aws_wafv2_regex_pattern_set" "rate_limits" {
+  for_each = { for rl in var.rate_limits : rl.name => rl }
 
-  override_action {
-    none {}
-  }
+  name        = "${var.name_prefix}-rate-limit-${each.key}"
+  description = "Regex patterns for rate limit rule ${each.key}"
+  scope       = var.scope
 
-  statement {
-    managed_rule_group_statement {
-      name        = "AWSManagedRulesCommonRuleSet"
-      vendor_name = "AWS"
+  dynamic "regular_expression" {
+    for_each = each.value.regex_patterns
+    content {
+      regex_string = regular_expression.value
     }
   }
 
-  visibility_config {
-    cloudwatch_metrics_enabled = var.cloudwatch_metrics_enabled
-    metric_name                = "${var.name_prefix}-common-rule-set"
-    sampled_requests_enabled   = var.sampled_requests_enabled
-  }
+  tags = var.tags
 }
