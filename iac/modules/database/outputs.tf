@@ -33,17 +33,12 @@ output "subnet_group_name" {
   value       = aws_db_subnet_group.this.name
 }
 
-output "auto_scaling_enabled" {
-  description = "Whether Aurora Auto Scaling is enabled"
-  value       = var.auto_scaling_enabled
+output "master_username" {
+  description = "Master username for the cluster"
+  value       = aws_rds_cluster.this.master_username
 }
 
-output "auto_scaling_min_readers" {
-  description = "Minimum number of read replicas when auto-scaling is enabled"
-  value       = var.auto_scaling_enabled ? var.auto_scaling_min_readers : null
-}
-
-output "auto_scaling_max_readers" {
-  description = "Maximum number of read replicas when auto-scaling is enabled"
-  value       = var.auto_scaling_enabled ? var.auto_scaling_max_readers : null
+output "master_secret_arn" {
+  description = "ARN of the master user secret managed by RDS"
+  value       = aws_rds_cluster.this.master_user_secret[0].secret_arn
 }
