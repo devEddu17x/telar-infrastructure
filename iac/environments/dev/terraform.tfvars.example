@@ -36,3 +36,15 @@ firewall_cloudwatch_metrics_enabled = false
 firewall_sampled_requests_enabled   = false
 firewall_redacted_fields            = ["authorization"]
 firewall_log_destination_arns       = []
+
+
+db_engine_version          = "17.7"
+db_name                    = "your_db_name"
+db_master_username         = "your_db_master_username"
+db_min_capacity            = 0.5
+db_max_capacity            = 16
+db_backup_retention_period = 7
+db_backup_window           = "08:00-09:00"
+db_maintenance_window      = "sun:09:00-sun:10:00"
+db_deletion_protection     = false
+db_skip_final_snapshot = true

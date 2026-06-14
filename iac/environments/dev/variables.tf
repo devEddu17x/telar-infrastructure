@@ -97,3 +97,56 @@ variable "firewall_redacted_fields" {
   type        = list(string)
   default     = []
 }
+
+variable "db_engine_version" {
+  description = "Aurora PostgreSQL engine version"
+  type        = string
+}
+
+variable "db_name" {
+  description = "Name of database"
+  type        = string
+}
+
+variable "db_master_username" {
+  description = "Master username for the cluster"
+  type        = string
+  sensitive   = true
+}
+
+variable "db_min_capacity" {
+  description = "Minimum ACU capacity for Aurora Serverless v2"
+  type        = number
+}
+variable "db_max_capacity" {
+  description = "Maximum ACU capacity for Aurora Serverless v2"
+  type        = number
+}
+
+variable "db_backup_retention_period" {
+  description = "Days to retain automated backups"
+  type        = number
+}
+variable "db_backup_window" {
+  description = "Daily time range for automated backups in UTC"
+  type        = string
+  default     = "08:00-09:00"
+}
+
+variable "db_maintenance_window" {
+  description = "Weekly window for maintenance tasks"
+  type        = string
+  default     = "sun:09:00-sun:10:00"
+}
+
+variable "db_deletion_protection" {
+  description = "Protect the cluster from accidental deletion"
+  type        = bool
+  default     = false
+}
+
+variable "db_skip_final_snapshot" {
+  description = "Skip final snapshot on cluster deletion"
+  type        = bool
+  default     = true
+}

@@ -6,9 +6,10 @@ variable "name_prefix" {
 variable "ecs_execution_secrets_manager_arns" {
   description = "List of Secrets Manager secret ARNs the ECS Execution Role is allowed to read at container startup (injected as env vars / secrets in the task definition)"
   type        = list(string)
+  default     = []
 
   validation {
-    condition     = length(var.ecs_execution_secrets_manager_arns) > 0 && alltrue([for arn in var.ecs_execution_secrets_manager_arns : arn != "*"])
+    condition     = alltrue([for arn in var.ecs_execution_secrets_manager_arns : arn != "*"])
     error_message = "Provide explicit Secrets Manager ARNs for the ECS Execution Role; \"*\" is not allowed."
   }
 }

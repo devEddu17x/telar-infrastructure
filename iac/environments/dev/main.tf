@@ -37,3 +37,21 @@ module "firewall_api" {
   logging_redacted_fields    = var.firewall_redacted_fields
   tags                       = local.default_tags
 }
+
+module "database" {
+  source                       = "../../modules/database"
+  name_prefix                  = local.name_prefix
+  availability_zones           = var.availability_zones
+  subnet_ids                   = module.networking.private_persistence_subnet_ids
+  security_group_ids           = module.networking.aurora_security_group_id
+  engine_version               = var.db_engine_version
+  database_name                = var.db_name
+  master_username              = var.db_master_username
+  serverless_min_capacity      = var.db_min_capacity
+  serverless_max_capacity      = var.db_max_capacity
+  backup_retention_period      = var.db_backup_retention_period
+  preferred_backup_window      = var.db_backup_window
+  preferred_maintenance_window = var.db_maintenance_window
+  deletion_protection          = var.db_deletion_protection
+  skip_final_snapshot          = var.db_skip_final_snapshot
+}

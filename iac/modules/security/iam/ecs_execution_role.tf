@@ -19,6 +19,17 @@ data "aws_iam_policy_document" "ecs_execution_secrets_policy" {
   }
 
   statement {
+    sid    = "AllowReadRdsManagedSecrets"
+    effect = "Allow"
+    actions = [
+      "secretsmanager:GetSecretValue",
+    ]
+    resources = [
+      "arn:aws:secretsmanager:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:secret:rds!cluster-*",
+    ]
+  }
+
+  statement {
     sid    = "AllowReadSSMParameters"
     effect = "Allow"
     actions = [
