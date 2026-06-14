@@ -37,3 +37,28 @@ output "firewall_api_web_acl_capacity" {
   description = "Web ACL Capacity Units (WCU) consumed by the configured rules"
   value       = module.firewall_api.web_acl_capacity
 }
+
+output "ecs_execution_role_arn" {
+  description = "ARN of the ECS Execution Role"
+  value       = module.iam.ecs_execution_role_arn
+}
+
+output "ecs_task_role_arn" {
+  description = "ARN of the ECS Task Role"
+  value       = module.iam.ecs_task_role_arn
+}
+
+output "lambda_pre_signup_role_arn" {
+  description = "ARN of the Lambda Pre Sign-up Role"
+  value       = module.iam.lambda_pre_signup_role_arn
+}
+
+output "ssm_parameter_arns" {
+  description = "ARNs of the created SSM parameters"
+  value       = module.ssm_parameters.parameter_arns
+}
+
+output "shared_secret_arn" {
+  description = "ARN of the shared internal auth token secret"
+  value       = module.shared_secrets.secret_arn
+}

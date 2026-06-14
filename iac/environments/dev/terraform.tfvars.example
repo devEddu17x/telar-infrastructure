@@ -48,3 +48,12 @@ db_backup_window           = "08:00-09:00"
 db_maintenance_window      = "sun:09:00-sun:10:00"
 db_deletion_protection     = false
 db_skip_final_snapshot     = true
+
+cognito_internal_auth_token = "your-internal-auth-token"
+
+backend_env = {
+  NODE_ENV           = "development"
+  API_PREFIX         = "api/v1"
+  API_PORT           = "3000"
+  AWS_COGNITO_REGION = "us-east-1"
+}

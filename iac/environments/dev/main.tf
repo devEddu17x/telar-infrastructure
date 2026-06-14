@@ -55,3 +55,34 @@ module "database" {
   deletion_protection          = var.db_deletion_protection
   skip_final_snapshot          = var.db_skip_final_snapshot
 }
+
+module "ssm_parameters" {
+  source      = "../../modules/security/ssm_parameters"
+  name_prefix = local.name_prefix
+  parameters = merge(
+    var.backend_env,
+    {
+      IMAGES_BUCKET_NAME   = module.storage_images.bucket_name
+      IMAGES_BUCKET_REGION = var.aws_region
+    }
+  )
+  tags = local.default_tags
+}
+
+module "shared_secrets" {
+  source        = "../../modules/security/secrets_manager"
+  secret_name   = "${local.name_prefix}/backend/internal-auth-token"
+  description   = "Internal auth token for backend-to-Cognito operations"
+  secret_string = var.cognito_internal_auth_token
+  tags          = local.default_tags
+}
+
+module "iam" {
+  source                                 = "../../modules/security/iam"
+  name_prefix                            = local.name_prefix
+  s3_bucket_arns                         = [module.storage_images.bucket_arn]
+  cognito_user_pool_arn                  = module.auth.user_pool_arn
+  ecs_execution_secrets_manager_arns     = [module.database.master_secret_arn, module.shared_secrets.secret_arn]
+  lambda_pre_signup_secrets_manager_arns = [module.shared_secrets.secret_arn]
+  ssm_parameter_arns                     = module.ssm_parameters.parameter_arns
+}
