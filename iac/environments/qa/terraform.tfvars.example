@@ -1,0 +1,38 @@
+aws_region  = "us-east-1"
+aws_profile = "your-aws-profile"
+
+project_name = "your-project-name"
+environment  = "qa"
+
+vpc_cidr           = "10.0.0.0/16"
+availability_zones = ["us-east-1c", "us-east-1d"]
+compute_subnet_cidrs = {
+  "us-east-1c" = "10.0.0.0/24"
+  "us-east-1d" = "10.0.1.0/24"
+}
+persistence_subnet_cidrs = {
+  "us-east-1c" = "10.0.2.0/24"
+  "us-east-1d" = "10.0.3.0/24"
+}
+ecs_container_port = your_container_port_number
+
+s3_images_force_destroy = true or false
+s3_images_cors = {
+  allowed_headers = []
+  allowed_methods = []
+  allowed_origins = []
+  max_age_seconds = 3000
+}
+
+s3_images_versioning_enabled    = true or false
+
+firewall_rate_limits = [{
+  name           = "rate_limit_name"
+  limit          = 50
+  regex_patterns = [".*/path/to/endpoint"]
+}]
+
+firewall_cloudwatch_metrics_enabled = false
+firewall_sampled_requests_enabled   = false
+firewall_redacted_fields            = ["authorization"]
+firewall_log_destination_arns       = []
