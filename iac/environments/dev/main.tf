@@ -86,3 +86,34 @@ module "iam" {
   lambda_pre_signup_secrets_manager_arns = [module.shared_secrets.secret_arn]
   ssm_parameter_arns                     = module.ssm_parameters.parameter_arns
 }
+
+module "storage_balancer_logs" {
+  source                  = "../../modules/storage"
+  name_prefix             = local.name_prefix
+  bucket_suffix           = "alb-logs"
+  force_destroy           = var.s3_images_force_destroy
+  versioning_enabled      = false
+  cors                    = { enabled = false, allowed_origins = [] }
+  alb_access_logs_enabled = true
+  alb_access_logs_prefix  = "logs"
+  tags                    = local.default_tags
+}
+
+module "balancer" {
+  source                     = "../../modules/balancer"
+  name_prefix                = local.name_prefix
+  vpc_id                     = module.networking.vpc_id
+  subnet_ids                 = module.networking.private_compute_subnet_ids
+  security_group_ids         = [module.networking.alb_security_group_id]
+  access_logs_bucket_id      = module.storage_balancer_logs.bucket_id
+  access_logs_prefix         = "logs"
+  enable_deletion_protection = var.balancer_deletion_protection
+  deregistration_delay       = var.balancer_deregistration_delay
+  health_check               = var.balancer_health_check
+  alb                        = var.balancer_alb
+  target_group               = var.balancer_target_group
+  tags                       = local.default_tags
+
+  depends_on = [module.storage_balancer_logs]
+}
+
