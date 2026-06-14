@@ -57,3 +57,28 @@ backend_env = {
   API_PORT           = "3000"
   AWS_COGNITO_REGION = "us-east-1"
 }
+
+balancer_deletion_protection = false
+balancer_alb = {
+  port     = 80
+  protocol = "HTTP"
+}
+balancer_target_group = {
+  port        = 3000
+  protocol    = "HTTPS"
+  target_type = "ip"
+}
+
+balancer_health_check = {
+  enabled             = true
+  path                = "/your/path/to/health"
+  protocol            = "HTTP"
+  port                = "your_port"
+  healthy_threshold   = 2
+  unhealthy_threshold = 3
+  interval            = 30
+  timeout             = 5
+  matcher             = "200"
+}
+balancer_deregistration_delay = 30
+balancer_logs_force_destroy   = true

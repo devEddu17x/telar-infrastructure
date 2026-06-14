@@ -161,3 +161,55 @@ variable "backend_env" {
   description = "Static non-sensitive backend configuration stored in SSM Parameter Store"
   type        = map(string)
 }
+
+variable "balancer_deletion_protection" {
+  description = "Deletion protection for the ALB"
+  type        = bool
+  default     = false
+}
+
+variable "balancer_alb" {
+  description = "ALB listener configuration (port exposed to API Gateway via VPC Link)"
+  type = object({
+    port     = optional(number, 80)
+    protocol = optional(string, "HTTP")
+  })
+  default = {}
+}
+
+variable "balancer_target_group" {
+  description = "Target group configuration. Must match ECS task definition."
+  type = object({
+    port        = optional(number, 3000)
+    protocol    = optional(string, "HTTP")
+    target_type = optional(string, "ip")
+  })
+  default = {}
+}
+
+variable "balancer_health_check" {
+  description = "Health check for the target group. Must match ECS task definition."
+  type = object({
+    enabled             = optional(bool, true)
+    path                = optional(string, "/health")
+    protocol            = optional(string, "HTTP")
+    port                = optional(string, "traffic-port")
+    healthy_threshold   = optional(number, 2)
+    unhealthy_threshold = optional(number, 2)
+    interval            = optional(number, 30)
+    timeout             = optional(number, 5)
+    matcher             = optional(string, "200")
+  })
+  default = {}
+}
+
+variable "balancer_deregistration_delay" {
+  description = "Delay in seconds before removing a target"
+  type        = number
+  default     = 30
+}
+
+variable "balancer_logs_force_destroy" {
+  description = "Allow bucket destruction even if it contains objects"
+  type        = bool
+}

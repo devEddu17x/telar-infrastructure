@@ -42,6 +42,19 @@ variable "logging_target_prefix" {
   type        = string
   default     = "log/"
 }
+
+variable "alb_access_logs_enabled" {
+  description = "Enable ALB access log delivery to this bucket"
+  type        = bool
+  default     = false
+}
+
+variable "alb_access_logs_prefix" {
+  description = "Prefix for ALB access log objects"
+  type        = string
+  default     = ""
+}
+
 variable "tags" {
   description = "Common tags applied to all storage resources"
   type        = map(string)

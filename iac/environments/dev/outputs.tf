@@ -62,3 +62,23 @@ output "shared_secret_arn" {
   description = "ARN of the shared internal auth token secret"
   value       = module.shared_secrets.secret_arn
 }
+
+output "balancer_alb_arn" {
+  description = "ARN of the Application Load Balancer"
+  value       = module.balancer.alb_arn
+}
+
+output "balancer_alb_listener_arn" {
+  description = "ARN of the ALB listener"
+  value       = module.balancer.alb_listener_arn
+}
+
+output "balancer_target_group_arn" {
+  description = "ARN of the ALB target group"
+  value       = module.balancer.target_group_arn
+}
+
+output "balancer_alb_dns_name" {
+  description = "DNS name of the Application Load Balancer"
+  value       = module.balancer.alb_dns_name
+}

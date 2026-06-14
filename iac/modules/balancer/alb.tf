@@ -8,7 +8,7 @@ resource "aws_lb" "alb" {
 
   access_logs {
     enabled = true
-    bucket  = var.access_logs_bucket
+    bucket  = var.access_logs_bucket_id
     prefix  = var.access_logs_prefix
   }
 

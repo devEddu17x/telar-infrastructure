@@ -65,8 +65,8 @@ variable "deregistration_delay" {
   default     = 30
 }
 
-variable "access_logs_bucket" {
-  description = "S3 bucket name for ALB access logs"
+variable "access_logs_bucket_id" {
+  description = "S3 bucket id for ALB access logs"
   type        = string
 }
 
