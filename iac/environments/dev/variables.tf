@@ -150,3 +150,14 @@ variable "db_skip_final_snapshot" {
   type        = bool
   default     = true
 }
+
+variable "cognito_internal_auth_token" {
+  description = "Internal auth token used by the backend for Cognito admin operations"
+  type        = string
+  sensitive   = true
+}
+
+variable "backend_env" {
+  description = "Static non-sensitive backend configuration stored in SSM Parameter Store"
+  type        = map(string)
+}
