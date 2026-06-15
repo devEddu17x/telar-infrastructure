@@ -124,3 +124,19 @@ module "balancer" {
   depends_on = [module.storage_balancer_logs]
 }
 
+module "api_gateway" {
+  source                          = "../../modules/api_gateway"
+  name_prefix                     = local.name_prefix
+  api_stage                       = var.api_stage
+  cognito_user_pool_arn           = module.auth.user_pool_arn
+  alb_arn                         = module.balancer.alb_arn
+  alb_dns_name                    = module.balancer.alb_dns_name
+  private_subnet_ids              = module.networking.private_compute_subnet_ids
+  apg_vpc_link_security_group_ids = [module.networking.apigw_vpc_link_security_group_id]
+  waf_web_acl_arn                 = module.firewall_api.web_acl_arn
+  access_log_group_arn            = module.observability.api_gateway_access_log_group_arn
+  api_gateway_cloudwatch_role_arn = module.iam.api_gateway_cloudwatch_role_arn
+  cors_configuration              = var.api_cors_configuration
+  tags                            = local.default_tags
+}
+
