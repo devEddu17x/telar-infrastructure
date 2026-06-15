@@ -82,3 +82,23 @@ output "balancer_alb_dns_name" {
   description = "DNS name of the Application Load Balancer"
   value       = module.balancer.alb_dns_name
 }
+
+output "api_gateway_id" {
+  description = "ID of the API Gateway"
+  value       = module.api_gateway.api_id
+}
+
+output "api_gateway_endpoint" {
+  description = "Base endpoint of the API Gateway"
+  value       = module.api_gateway.api_endpoint
+}
+
+output "api_gateway_stage_arn" {
+  description = "ARN of the API Gateway stage"
+  value       = module.api_gateway.stage_arn
+}
+
+output "api_gateway_vpc_link_id" {
+  description = "ID of the VPC Link"
+  value       = module.api_gateway.vpc_link_id
+}
