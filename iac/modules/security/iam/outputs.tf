@@ -27,3 +27,8 @@ output "lambda_pre_signup_role_name" {
   description = "Name of the Lambda Execution Role for the Pre Sign-up Trigger."
   value       = aws_iam_role.lambda_pre_signup_role.name
 }
+
+output "api_gateway_cloudwatch_role_arn" {
+  description = "ARN of the IAM role used by API Gateway to write CloudWatch Logs"
+  value       = aws_iam_role.api_gateway_cloudwatch.arn
+}
