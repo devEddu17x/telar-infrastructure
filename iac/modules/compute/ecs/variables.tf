@@ -91,6 +91,11 @@ variable "aws_region" {
   type        = string
 }
 
+variable "log_group_name" {
+  description = "CloudWatch log group name for container logs"
+  type        = string
+}
+
 variable "enable_container_insights" {
   description = "Enable CloudWatch Container Insights"
   type        = bool
