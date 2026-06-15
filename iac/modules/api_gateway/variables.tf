@@ -3,38 +3,14 @@ variable "name_prefix" {
   type        = string
 }
 
-variable "api_prefix" {
-  description = "API path prefix"
-  type        = string
-}
-
-variable "api_version" {
-  description = "API version"
-  type        = string
-}
-
 variable "api_stage" {
-  description = "Stage name (dev, qa, prod)"
+  description = "Stage name"
   type        = string
 }
 
-variable "cognito_user_pool_issuer_url" {
-  description = "Issuer URL of the Cognito User Pool"
+variable "cognito_user_pool_arn" {
+  description = "ARN of the Cognito User Pool"
   type        = string
-}
-
-variable "cognito_user_pool_client_ids" {
-  description = "List of Client IDs from the Cognito User Pool allowed by the JWT authorizer"
-  type        = list(string)
-}
-
-variable "routes" {
-  description = "List of routes to expose through the API Gateway"
-  type = list(object({
-    route_key          = string
-    authorization_type = string
-  }))
-  default = []
 }
 
 variable "cors_configuration" {
@@ -60,13 +36,18 @@ variable "apg_vpc_link_security_group_ids" {
   type        = list(string)
 }
 
-variable "alb_listener_arn" {
-  description = "ARN of the ALB listener that the integration will target"
+variable "alb_arn" {
+  description = "ARN of the internal ALB for the VPC Link"
+  type        = string
+}
+
+variable "alb_dns_name" {
+  description = "DNS name of the internal ALB"
   type        = string
 }
 
 variable "waf_web_acl_arn" {
-  description = "ARN of the WAF Web ACL to associate with the API Gateway stage"
+  description = "ARN of the WAF Web ACL"
   type        = string
 }
 
@@ -75,13 +56,13 @@ variable "access_log_group_arn" {
   type        = string
 }
 
-variable "access_log_format" {
-  description = "JSON format for access logs"
+variable "api_gateway_cloudwatch_role_arn" {
+  description = "ARN of the IAM role used by API Gateway to write CloudWatch Logs"
   type        = string
 }
 
 variable "tags" {
-  description = "Tags to Api Gateway"
+  description = "Tags for API Gateway resources"
   type        = map(string)
   default     = {}
 }
