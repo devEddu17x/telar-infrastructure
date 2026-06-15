@@ -1,11 +1,7 @@
-resource "aws_apigatewayv2_authorizer" "cognito" {
-  api_id           = aws_apigatewayv2_api.main.id
-  name             = "${var.name_prefix}-authorizer"
-  authorizer_type  = "JWT"
-  identity_sources = ["$request.header.Authorization"]
-
-  jwt_configuration {
-    issuer   = var.cognito_user_pool_issuer_url
-    audience = var.cognito_user_pool_client_ids
-  }
+resource "aws_api_gateway_authorizer" "cognito" {
+  name            = "${var.name_prefix}-authorizer"
+  rest_api_id     = aws_api_gateway_rest_api.main.id
+  type            = "COGNITO_USER_POOLS"
+  provider_arns   = [var.cognito_user_pool_arn]
+  identity_source = "method.request.header.Authorization"
 }
