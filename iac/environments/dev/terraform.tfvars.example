@@ -26,6 +26,8 @@ s3_images_cors = {
 
 s3_images_versioning_enabled    = true or false
 
+observability_retention_in_days = 7
+
 firewall_rate_limits = [{
   name           = "rate_limit_name"
   limit          = 50
