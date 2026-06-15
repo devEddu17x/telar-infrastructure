@@ -77,11 +77,12 @@ module "ssm_parameters" {
 }
 
 module "shared_secrets" {
-  source        = "../../modules/security/secrets_manager"
-  secret_name   = "${local.name_prefix}/backend/internal-auth-token"
-  description   = "Internal auth token for backend-to-Cognito operations"
-  secret_string = var.cognito_internal_auth_token
-  tags          = local.default_tags
+  source                  = "../../modules/security/secrets_manager"
+  secret_name             = "${local.name_prefix}/backend/internal-auth-token"
+  description             = "Internal auth token for backend-to-Cognito operations"
+  secret_string           = var.cognito_internal_auth_token.value
+  recovery_window_in_days = var.cognito_internal_auth_token.retention_days
+  tags                    = local.default_tags
 }
 
 module "iam" {
