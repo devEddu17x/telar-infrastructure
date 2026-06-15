@@ -64,6 +64,12 @@ variable "s3_images_versioning_enabled" {
   type        = bool
 }
 
+variable "observability_retention_in_days" {
+  description = "CloudWatch log retention in days"
+  type        = number
+  default     = 7
+}
+
 variable "firewall_rate_limits" {
   description = "Each entry creates one rule and one regex pattern set."
   type = list(object({

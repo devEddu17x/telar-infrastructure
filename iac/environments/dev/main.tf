@@ -38,6 +38,13 @@ module "firewall_api" {
   tags                       = local.default_tags
 }
 
+module "observability" {
+  source            = "../../modules/observability"
+  name_prefix       = local.name_prefix
+  retention_in_days = var.observability_retention_in_days
+  tags              = local.default_tags
+}
+
 module "database" {
   source                       = "../../modules/database"
   name_prefix                  = local.name_prefix
