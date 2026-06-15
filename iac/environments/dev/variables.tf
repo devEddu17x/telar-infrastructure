@@ -219,3 +219,23 @@ variable "balancer_logs_force_destroy" {
   description = "Allow bucket destruction even if it contains objects"
   type        = bool
 }
+
+variable "api_stage" {
+  description = "API Gateway stage name"
+  type        = string
+}
+
+variable "api_cors_configuration" {
+  description = "CORS configuration for API Gateway"
+  type = object({
+    allow_credentials = optional(bool, false)
+    allow_headers     = optional(list(string), ["authorization", "content-type"])
+    allow_methods     = optional(list(string), ["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+    allow_origins     = optional(list(string), [])
+    expose_headers    = optional(list(string), [])
+    max_age           = optional(number, 300)
+  })
+  default = {}
+}
+
+
