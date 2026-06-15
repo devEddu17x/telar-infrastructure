@@ -38,6 +38,18 @@ module "firewall_api" {
   tags                       = local.default_tags
 }
 
+module "firewall_frontend" {
+  source                     = "../../modules/firewall"
+  name_prefix                = "${local.name_prefix}-frontend"
+  scope                      = "CLOUDFRONT"
+  rate_limits                = var.firewall_rate_limits
+  cloudwatch_metrics_enabled = var.firewall_cloudwatch_metrics_enabled
+  sampled_requests_enabled   = var.firewall_sampled_requests_enabled
+  log_destination_arns       = var.firewall_log_destination_arns
+  logging_redacted_fields    = var.firewall_redacted_fields
+  tags                       = local.default_tags
+}
+
 module "observability" {
   source            = "../../modules/observability"
   name_prefix       = local.name_prefix
@@ -122,5 +134,25 @@ module "balancer" {
   tags                       = local.default_tags
 
   depends_on = [module.storage_balancer_logs]
+}
+
+module "frontend" {
+  source                       = "../../modules/frontend"
+  name_prefix                  = local.name_prefix
+  repository_url               = var.frontend_repository_url
+  github_access_token          = var.frontend_github_access_token
+  branch                       = var.frontend_branch
+  branch_stage                 = var.frontend_branch_stage
+  framework                    = var.frontend_framework
+  node_version                 = var.frontend_node_version
+  domain_name                  = var.frontend_domain_name
+  web_acl_arn                  = module.firewall_frontend.web_acl_arn
+  cognito_user_pool_id         = module.auth.user_pool_id
+  cognito_user_pool_endpoint   = module.auth.user_pool_endpoint
+  cognito_client_id            = module.auth.frontend_client_id
+  api_base_url                 = var.frontend_api_base_url
+  tags                         = local.default_tags
+
+  depends_on = [module.firewall_frontend, module.auth]
 }
 
