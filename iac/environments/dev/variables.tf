@@ -159,8 +159,11 @@ variable "db_skip_final_snapshot" {
 
 variable "cognito_internal_auth_token" {
   description = "Internal auth token used by the backend for Cognito admin operations"
-  type        = string
-  sensitive   = true
+  type = object({
+    value          = string
+    retention_days = number
+  })
+  sensitive = true
 }
 
 variable "backend_env" {
