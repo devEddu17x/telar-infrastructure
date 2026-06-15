@@ -84,3 +84,12 @@ balancer_health_check = {
 }
 balancer_deregistration_delay = 30
 balancer_logs_force_destroy   = true
+
+frontend_repository_url       = "https://github.com/your-org/your-landing-repo"
+frontend_github_access_token  = "your-github-pat"
+frontend_branch               = "develop"
+frontend_branch_stage         = "PRODUCTION"
+frontend_framework            = "Next.js - SSG"
+frontend_node_version         = "20"
+frontend_domain_name          = ""
+frontend_api_base_url         = ""
