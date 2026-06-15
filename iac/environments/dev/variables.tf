@@ -219,3 +219,55 @@ variable "balancer_logs_force_destroy" {
   description = "Allow bucket destruction even if it contains objects"
   type        = bool
 }
+
+variable "frontend_repository_url" {
+  description = "HTTPS URL of the GitHub/GitLab repository containing the frontend source code"
+  type        = string
+}
+
+variable "frontend_github_access_token" {
+  description = "Personal Access Token with repo and admin:repo_hook scopes for the frontend repository"
+  type        = string
+  sensitive   = true
+}
+
+variable "frontend_branch" {
+  description = "Git branch to deploy for the frontend"
+  type        = string
+  default     = "develop"
+}
+
+variable "frontend_domain_name" {
+  description = "Custom domain to associate with the Amplify app. Leave empty to use the default amplifyapp.com domain."
+  type        = string
+  default     = ""
+}
+
+variable "frontend_node_version" {
+  description = "Node.js version to use in the Amplify build environment"
+  type        = string
+  default     = "20"
+}
+
+variable "frontend_framework" {
+  description = "Framework used for the frontend application"
+  type        = string
+  default     = "Next.js - SSG"
+}
+
+variable "frontend_branch_stage" {
+  description = "Amplify stage for the deployed branch (DEVELOPMENT, BETA, PRODUCTION)"
+  type        = string
+  default     = "PRODUCTION"
+
+  validation {
+    condition     = contains(["DEVELOPMENT", "BETA", "PRODUCTION"], var.frontend_branch_stage)
+    error_message = "frontend_branch_stage must be DEVELOPMENT, BETA or PRODUCTION"
+  }
+}
+
+variable "frontend_api_base_url" {
+  description = "Base URL of the backend API to expose to the frontend app"
+  type        = string
+  default     = ""
+}

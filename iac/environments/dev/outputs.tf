@@ -19,23 +19,43 @@ output "cognito_frontend_client_id" {
 }
 
 output "firewall_api_web_acl_arn" {
-  description = "ARN of the WAFv2 Web ACL."
+  description = "ARN of the WAFv2 Web ACL for the API"
   value       = module.firewall_api.web_acl_arn
 }
 
 output "firewall_api_web_acl_id" {
-  description = "ID of the WAFv2 Web ACL"
+  description = "ID of the WAFv2 Web ACL for the API"
   value       = module.firewall_api.web_acl_id
 }
 
 output "firewall_api_web_acl_name" {
-  description = "Name of the WAFv2 Web ACL"
+  description = "Name of the WAFv2 Web ACL for the API"
   value       = module.firewall_api.web_acl_name
 }
 
 output "firewall_api_web_acl_capacity" {
-  description = "Web ACL Capacity Units (WCU) consumed by the configured rules"
+  description = "Web ACL Capacity Units (WCU) consumed by the API WAF"
   value       = module.firewall_api.web_acl_capacity
+}
+
+output "firewall_frontend_web_acl_arn" {
+  description = "ARN of the WAFv2 Web ACL for the frontend (CloudFront scope)"
+  value       = module.firewall_frontend.web_acl_arn
+}
+
+output "firewall_frontend_web_acl_id" {
+  description = "ID of the WAFv2 Web ACL for the frontend (CloudFront scope)"
+  value       = module.firewall_frontend.web_acl_id
+}
+
+output "firewall_frontend_web_acl_name" {
+  description = "Name of the WAFv2 Web ACL for the frontend (CloudFront scope)"
+  value       = module.firewall_frontend.web_acl_name
+}
+
+output "firewall_frontend_web_acl_capacity" {
+  description = "Web ACL Capacity Units (WCU) consumed by the frontend WAF"
+  value       = module.firewall_frontend.web_acl_capacity
 }
 
 output "ecs_execution_role_arn" {
@@ -81,4 +101,29 @@ output "balancer_target_group_arn" {
 output "balancer_alb_dns_name" {
   description = "DNS name of the Application Load Balancer"
   value       = module.balancer.alb_dns_name
+}
+
+output "frontend_app_id" {
+  description = "Unique ID of the Amplify frontend app"
+  value       = module.frontend.app_id
+}
+
+output "frontend_app_arn" {
+  description = "ARN of the Amplify frontend app"
+  value       = module.frontend.app_arn
+}
+
+output "frontend_default_domain" {
+  description = "Default Amplify domain for the frontend app"
+  value       = module.frontend.default_domain
+}
+
+output "frontend_branch_url" {
+  description = "Public HTTPS URL for the deployed frontend branch"
+  value       = module.frontend.branch_url
+}
+
+output "frontend_custom_domain_url" {
+  description = "Custom domain URL of the frontend app (if configured)"
+  value       = module.frontend.custom_domain_url
 }
