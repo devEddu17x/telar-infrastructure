@@ -115,7 +115,6 @@ module "balancer" {
   security_group_ids         = [module.networking.alb_security_group_id]
   access_logs_bucket_id      = module.storage_balancer_logs.bucket_id
   access_logs_prefix         = "logs"
-  enable_deletion_protection = var.balancer_deletion_protection
   deregistration_delay       = var.balancer_deregistration_delay
   health_check               = var.balancer_health_check
   alb                        = var.balancer_alb
