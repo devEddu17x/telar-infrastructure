@@ -18,6 +18,16 @@ variable "bucket_arn" {
   type        = string
 }
 
+variable "failover_bucket_regional_domain_name" {
+  description = "Regional domain name of the failover S3 bucket."
+  type        = string
+}
+
+variable "failover_bucket_arn" {
+  description = "ARN of the failover S3 bucket. Used to extend the OAC bucket policy to the replica bucket."
+  type        = string
+}
+
 variable "price_class" {
   description = "CloudFront price class. Allowed values: PriceClass_All, PriceClass_200, PriceClass_100"
   type        = string
@@ -37,7 +47,7 @@ variable "default_root_object" {
 }
 
 variable "origin_id" {
-  description = "Unique identifier for the origin within this distribution"
+  description = "Unique identifier for the primary origin within this distribution"
   type        = string
   default     = "s3-origin"
 }

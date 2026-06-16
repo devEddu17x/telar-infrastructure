@@ -19,10 +19,34 @@ resource "aws_cloudfront_distribution" "this" {
     origin_access_control_id = aws_cloudfront_origin_access_control.this.id
   }
 
+  origin {
+    domain_name              = var.failover_bucket_regional_domain_name
+    origin_id                = "${var.origin_id}-failover"
+    origin_access_control_id = aws_cloudfront_origin_access_control.this.id
+  }
+
+  origin_group {
+    origin_id = "${var.origin_id}-group"
+
+    failover_criteria {
+      status_codes = [500, 502, 503, 504, 403, 404]
+    }
+
+    member {
+      origin_id = var.origin_id
+    }
+
+    member {
+      origin_id = "${var.origin_id}-failover"
+    }
+  }
+
   default_cache_behavior {
-    allowed_methods        = var.allowed_methods
-    cached_methods         = var.cached_methods
-    target_origin_id       = var.origin_id
+    allowed_methods = var.allowed_methods
+    cached_methods  = var.cached_methods
+
+    target_origin_id = "${var.origin_id}-group"
+
     viewer_protocol_policy = var.viewer_protocol_policy
     compress               = true
 
