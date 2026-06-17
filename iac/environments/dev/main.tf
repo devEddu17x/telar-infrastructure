@@ -89,11 +89,12 @@ module "ssm_parameters" {
 }
 
 module "shared_secrets" {
-  source        = "../../modules/security/secrets_manager"
-  secret_name   = "${local.name_prefix}/backend/internal-auth-token"
-  description   = "Internal auth token for backend-to-Cognito operations"
-  secret_string = var.cognito_internal_auth_token
-  tags          = local.default_tags
+  source                  = "../../modules/security/secrets_manager"
+  secret_name             = "${local.name_prefix}/backend/internal-auth-token"
+  description             = "Internal auth token for backend-to-Cognito operations"
+  secret_string           = var.cognito_internal_auth_token.value
+  recovery_window_in_days = var.cognito_internal_auth_token.retention_days
+  tags                    = local.default_tags
 }
 
 module "iam" {
@@ -126,7 +127,6 @@ module "balancer" {
   security_group_ids         = [module.networking.alb_security_group_id]
   access_logs_bucket_id      = module.storage_balancer_logs.bucket_id
   access_logs_prefix         = "logs"
-  enable_deletion_protection = var.balancer_deletion_protection
   deregistration_delay       = var.balancer_deregistration_delay
   health_check               = var.balancer_health_check
   alb                        = var.balancer_alb
@@ -136,23 +136,19 @@ module "balancer" {
   depends_on = [module.storage_balancer_logs]
 }
 
-module "frontend" {
-  source                       = "../../modules/frontend"
-  name_prefix                  = local.name_prefix
-  repository_url               = var.frontend_repository_url
-  github_access_token          = var.frontend_github_access_token
-  branch                       = var.frontend_branch
-  branch_stage                 = var.frontend_branch_stage
-  framework                    = var.frontend_framework
-  node_version                 = var.frontend_node_version
-  domain_name                  = var.frontend_domain_name
-  web_acl_arn                  = module.firewall_frontend.web_acl_arn
-  cognito_user_pool_id         = module.auth.user_pool_id
-  cognito_user_pool_endpoint   = module.auth.user_pool_endpoint
-  cognito_client_id            = module.auth.frontend_client_id
-  api_base_url                 = var.frontend_api_base_url
-  tags                         = local.default_tags
-
-  depends_on = [module.firewall_frontend, module.auth]
+module "api_gateway" {
+  source                          = "../../modules/api_gateway"
+  name_prefix                     = local.name_prefix
+  api_stage                       = var.api_stage
+  cognito_user_pool_arn           = module.auth.user_pool_arn
+  alb_arn                         = module.balancer.alb_arn
+  alb_dns_name                    = module.balancer.alb_dns_name
+  private_subnet_ids              = module.networking.private_compute_subnet_ids
+  apg_vpc_link_security_group_ids = [module.networking.apigw_vpc_link_security_group_id]
+  waf_web_acl_arn                 = module.firewall_api.web_acl_arn
+  access_log_group_arn            = module.observability.api_gateway_access_log_group_arn
+  api_gateway_cloudwatch_role_arn = module.iam.api_gateway_cloudwatch_role_arn
+  cors_configuration              = var.api_cors_configuration
+  tags                            = local.default_tags
 }
 

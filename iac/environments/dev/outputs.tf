@@ -103,27 +103,22 @@ output "balancer_alb_dns_name" {
   value       = module.balancer.alb_dns_name
 }
 
-output "frontend_app_id" {
-  description = "Unique ID of the Amplify frontend app"
-  value       = module.frontend.app_id
+output "api_gateway_id" {
+  description = "ID of the API Gateway"
+  value       = module.api_gateway.api_id
 }
 
-output "frontend_app_arn" {
-  description = "ARN of the Amplify frontend app"
-  value       = module.frontend.app_arn
+output "api_gateway_endpoint" {
+  description = "Base endpoint of the API Gateway"
+  value       = module.api_gateway.api_endpoint
 }
 
-output "frontend_default_domain" {
-  description = "Default Amplify domain for the frontend app"
-  value       = module.frontend.default_domain
+output "api_gateway_stage_arn" {
+  description = "ARN of the API Gateway stage"
+  value       = module.api_gateway.stage_arn
 }
 
-output "frontend_branch_url" {
-  description = "Public HTTPS URL for the deployed frontend branch"
-  value       = module.frontend.branch_url
-}
-
-output "frontend_custom_domain_url" {
-  description = "Custom domain URL of the frontend app (if configured)"
-  value       = module.frontend.custom_domain_url
+output "api_gateway_vpc_link_id" {
+  description = "ID of the VPC Link"
+  value       = module.api_gateway.vpc_link_id
 }

@@ -159,8 +159,11 @@ variable "db_skip_final_snapshot" {
 
 variable "cognito_internal_auth_token" {
   description = "Internal auth token used by the backend for Cognito admin operations"
-  type        = string
-  sensitive   = true
+  type = object({
+    value          = string
+    retention_days = number
+  })
+  sensitive = true
 }
 
 variable "backend_env" {
@@ -220,54 +223,22 @@ variable "balancer_logs_force_destroy" {
   type        = bool
 }
 
-variable "frontend_repository_url" {
-  description = "HTTPS URL of the GitHub/GitLab repository containing the frontend source code"
+variable "api_stage" {
+  description = "API Gateway stage name"
   type        = string
 }
 
-variable "frontend_github_access_token" {
-  description = "Personal Access Token with repo and admin:repo_hook scopes for the frontend repository"
-  type        = string
-  sensitive   = true
+variable "api_cors_configuration" {
+  description = "CORS configuration for API Gateway"
+  type = object({
+    allow_credentials = optional(bool, false)
+    allow_headers     = optional(list(string), ["authorization", "content-type"])
+    allow_methods     = optional(list(string), ["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+    allow_origins     = optional(list(string), [])
+    expose_headers    = optional(list(string), [])
+    max_age           = optional(number, 300)
+  })
+  default = {}
 }
 
-variable "frontend_branch" {
-  description = "Git branch to deploy for the frontend"
-  type        = string
-  default     = "develop"
-}
 
-variable "frontend_domain_name" {
-  description = "Custom domain to associate with the Amplify app. Leave empty to use the default amplifyapp.com domain."
-  type        = string
-  default     = ""
-}
-
-variable "frontend_node_version" {
-  description = "Node.js version to use in the Amplify build environment"
-  type        = string
-  default     = "20"
-}
-
-variable "frontend_framework" {
-  description = "Framework used for the frontend application"
-  type        = string
-  default     = "Next.js - SSG"
-}
-
-variable "frontend_branch_stage" {
-  description = "Amplify stage for the deployed branch (DEVELOPMENT, BETA, PRODUCTION)"
-  type        = string
-  default     = "PRODUCTION"
-
-  validation {
-    condition     = contains(["DEVELOPMENT", "BETA", "PRODUCTION"], var.frontend_branch_stage)
-    error_message = "frontend_branch_stage must be DEVELOPMENT, BETA or PRODUCTION"
-  }
-}
-
-variable "frontend_api_base_url" {
-  description = "Base URL of the backend API to expose to the frontend app"
-  type        = string
-  default     = ""
-}

@@ -4,7 +4,10 @@ resource "aws_lb" "alb" {
   load_balancer_type         = "application"
   security_groups            = var.security_group_ids
   subnets                    = var.subnet_ids
-  enable_deletion_protection = var.enable_deletion_protection
+
+  enable_deletion_protection = true
+  drop_invalid_header_fields = true
+
 
   access_logs {
     enabled = true
