@@ -27,13 +27,13 @@ variable "framework" {
 }
 
 variable "branch_stage" {
-  description = "Amplify stage for the deployed branch (DEVELOPMENT, BETA, PRODUCTION)"
+  description = "Amplify stage for the deployed branch (DEVELOPMENT, QA, PRODUCTION)"
   type        = string
   default     = "PRODUCTION"
 
   validation {
     condition     = contains(["DEVELOPMENT", "QA", "PRODUCTION"], var.branch_stage)
-    error_message = "branch_stage must be DEVELOPMENT, BETA or PRODUCTION"
+    error_message = "branch_stage must be DEVELOPMENT, QA or PRODUCTION"
   }
 }
 
