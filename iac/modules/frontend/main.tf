@@ -10,10 +10,10 @@ resource "aws_amplify_app" "frontend" {
         preBuild:
           commands:
             - nvm use ${var.node_version}
-            - npm ci
+            - pnpm install
         build:
           commands:
-            - npm run build
+            - pnpm run build
       artifacts:
         baseDirectory: out
         files:
