@@ -38,18 +38,6 @@ module "firewall_api" {
   tags                       = local.default_tags
 }
 
-module "firewall_frontend" {
-  source                     = "../../modules/firewall"
-  name_prefix                = "${local.name_prefix}-frontend"
-  scope                      = "CLOUDFRONT"
-  rate_limits                = var.firewall_rate_limits
-  cloudwatch_metrics_enabled = var.firewall_cloudwatch_metrics_enabled
-  sampled_requests_enabled   = var.firewall_sampled_requests_enabled
-  log_destination_arns       = var.firewall_log_destination_arns
-  logging_redacted_fields    = var.firewall_redacted_fields
-  tags                       = local.default_tags
-}
-
 module "observability" {
   source            = "../../modules/observability"
   name_prefix       = local.name_prefix
