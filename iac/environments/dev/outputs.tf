@@ -38,26 +38,6 @@ output "firewall_api_web_acl_capacity" {
   value       = module.firewall_api.web_acl_capacity
 }
 
-output "firewall_frontend_web_acl_arn" {
-  description = "ARN of the WAFv2 Web ACL for the frontend (CloudFront scope)"
-  value       = module.firewall_frontend.web_acl_arn
-}
-
-output "firewall_frontend_web_acl_id" {
-  description = "ID of the WAFv2 Web ACL for the frontend (CloudFront scope)"
-  value       = module.firewall_frontend.web_acl_id
-}
-
-output "firewall_frontend_web_acl_name" {
-  description = "Name of the WAFv2 Web ACL for the frontend (CloudFront scope)"
-  value       = module.firewall_frontend.web_acl_name
-}
-
-output "firewall_frontend_web_acl_capacity" {
-  description = "Web ACL Capacity Units (WCU) consumed by the frontend WAF"
-  value       = module.firewall_frontend.web_acl_capacity
-}
-
 output "ecs_execution_role_arn" {
   description = "ARN of the ECS Execution Role"
   value       = module.iam.ecs_execution_role_arn
