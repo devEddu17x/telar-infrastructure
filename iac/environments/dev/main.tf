@@ -234,3 +234,26 @@ module "auto_scaling" {
   target      = var.ecs_auto_scaling.target
   metric_type = var.ecs_auto_scaling.metric_type
 }
+
+module "frontend_system" {
+  source = "../../modules/frontend"
+
+  name_prefix         = local.name_prefix
+  aws_region          = var.aws_region
+  aws_profile         = var.aws_profile != null ? var.aws_profile : ""
+  repository_url      = var.frontend_repository_url
+  github_access_token = var.frontend_github_access_token
+  branch              = var.frontend_branch
+  branch_stage        = "DEVELOPMENT"
+  node_version        = var.frontend_node_version
+  framework           = "Next.js - SSR"
+
+  cognito_user_pool_id       = module.auth.user_pool_id
+  cognito_user_pool_endpoint = module.auth.user_pool_endpoint
+  cognito_client_id          = module.auth.frontend_client_id
+
+  api_base_url = module.api_gateway.api_endpoint
+  api_url      = "${module.api_gateway.api_endpoint}/${var.api_stage}/${var.backend_env["API_PREFIX"]}"
+
+  tags = local.default_tags
+}
