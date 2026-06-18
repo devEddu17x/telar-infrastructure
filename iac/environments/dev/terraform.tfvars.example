@@ -96,3 +96,12 @@ api_cors_configuration = {
   max_age           = 300
 }
 
+ecs_container_image = "your_initial_ecr_imge_uri"
+ecs_desired_count   = 1
+ecs_task_cpu        = "1024"
+ecs_task_memory     = "2048"
+
+ecs_auto_scaling = {
+  min = 1
+  max = 4
+}
