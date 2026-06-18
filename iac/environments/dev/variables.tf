@@ -276,4 +276,26 @@ variable "ecs_auto_scaling" {
   default = {}
 }
 
+variable "frontend_repository_url" {
+  description = "HTTPS URL of the GitHub repository containing the system frontend source code"
+  type        = string
+}
 
+variable "frontend_github_access_token" {
+  description = "Personal Access Token with repo and admin:repo_hook scopes. Leave empty when using the Amplify GitHub App connection"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "frontend_branch" {
+  description = "Git branch to deploy for the system frontend"
+  type        = string
+  default     = "main"
+}
+
+variable "frontend_node_version" {
+  description = "Node.js version to use in the Amplify build environment for the system frontend"
+  type        = string
+  default     = "20"
+}
