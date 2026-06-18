@@ -26,6 +26,12 @@ module "storage_images" {
   tags               = local.default_tags
 }
 
+module "ecr_api" {
+  source          = "../../modules/repository"
+  repository_name = "${local.name_prefix}-api"
+  tags            = local.default_tags
+}
+
 module "firewall_api" {
   source                     = "../../modules/firewall"
   name_prefix                = local.name_prefix
@@ -63,14 +69,19 @@ module "database" {
   skip_final_snapshot          = var.db_skip_final_snapshot
 }
 
+data "aws_secretsmanager_secret_version" "rds_master" {
+  secret_id = module.database.master_secret_arn
+}
+
 module "ssm_parameters" {
   source      = "../../modules/security/ssm_parameters"
   name_prefix = local.name_prefix
   parameters = merge(
     var.backend_env,
     {
-      IMAGES_BUCKET_NAME   = module.storage_images.bucket_name
-      IMAGES_BUCKET_REGION = var.aws_region
+      IMAGES_BUCKET_NAME                 = module.storage_images.bucket_name
+      IMAGES_BUCKET_REGION               = var.aws_region
+      IMAGES_BUCKET_REGIONAL_DOMAIN_NAME = module.storage_images.bucket_regional_domain_name
     }
   )
   tags = local.default_tags
@@ -85,12 +96,21 @@ module "shared_secrets" {
   tags                    = local.default_tags
 }
 
+module "db_password_secret" {
+  source                  = "../../modules/security/secrets_manager"
+  secret_name             = "${local.name_prefix}/backend/db-password"
+  description             = "Database password extracted from RDS managed secret"
+  secret_string           = jsondecode(data.aws_secretsmanager_secret_version.rds_master.secret_string).password
+  recovery_window_in_days = 0
+  tags                    = local.default_tags
+}
+
 module "iam" {
   source                                 = "../../modules/security/iam"
   name_prefix                            = local.name_prefix
   s3_bucket_arns                         = [module.storage_images.bucket_arn]
   cognito_user_pool_arn                  = module.auth.user_pool_arn
-  ecs_execution_secrets_manager_arns     = [module.database.master_secret_arn, module.shared_secrets.secret_arn]
+  ecs_execution_secrets_manager_arns     = [module.db_password_secret.secret_arn, module.shared_secrets.secret_arn]
   lambda_pre_signup_secrets_manager_arns = [module.shared_secrets.secret_arn]
   ssm_parameter_arns                     = module.ssm_parameters.parameter_arns
 }
@@ -108,18 +128,18 @@ module "storage_balancer_logs" {
 }
 
 module "balancer" {
-  source                     = "../../modules/balancer"
-  name_prefix                = local.name_prefix
-  vpc_id                     = module.networking.vpc_id
-  subnet_ids                 = module.networking.private_compute_subnet_ids
-  security_group_ids         = [module.networking.alb_security_group_id]
-  access_logs_bucket_id      = module.storage_balancer_logs.bucket_id
-  access_logs_prefix         = "logs"
-  deregistration_delay       = var.balancer_deregistration_delay
-  health_check               = var.balancer_health_check
-  alb                        = var.balancer_alb
-  target_group               = var.balancer_target_group
-  tags                       = local.default_tags
+  source                = "../../modules/balancer"
+  name_prefix           = local.name_prefix
+  vpc_id                = module.networking.vpc_id
+  subnet_ids            = module.networking.private_compute_subnet_ids
+  security_group_ids    = [module.networking.alb_security_group_id]
+  access_logs_bucket_id = module.storage_balancer_logs.bucket_id
+  access_logs_prefix    = "logs"
+  deregistration_delay  = var.balancer_deregistration_delay
+  health_check          = var.balancer_health_check
+  alb                   = var.balancer_alb
+  target_group          = var.balancer_target_group
+  tags                  = local.default_tags
 
   depends_on = [module.storage_balancer_logs]
 }
@@ -140,3 +160,77 @@ module "api_gateway" {
   tags                            = local.default_tags
 }
 
+resource "null_resource" "push_placeholder_image" {
+  depends_on = [module.ecr_api]
+
+  triggers = {
+    repository_url = module.ecr_api.repository_url
+    repository_arn = module.ecr_api.repository_arn
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      set -e
+      AWS_PAGER="" aws ecr get-login-password --region ${var.aws_region}${var.aws_profile != null ? " --profile ${var.aws_profile}" : ""} | \
+        docker login --username AWS --password-stdin ${module.ecr_api.repository_url} > /dev/null 2>&1
+      docker build --quiet -t ${module.ecr_api.repository_url}:placeholder ${path.module}/../../services/placeholder/
+      docker push --quiet ${module.ecr_api.repository_url}:placeholder
+    EOT
+  }
+}
+
+module "ecs" {
+  source               = "../../modules/compute/ecs"
+  name_prefix          = local.name_prefix
+  container_image      = coalesce(var.ecs_container_image, "${module.ecr_api.repository_url}:placeholder")
+  container_port       = var.ecs_container_port
+  desired_count        = var.ecs_desired_count
+  task_cpu             = var.ecs_task_cpu
+  task_memory          = var.ecs_task_memory
+  subnet_ids           = module.networking.private_compute_subnet_ids
+  security_group_ids   = [module.networking.ecs_tasks_security_group_id]
+  alb_target_group_arn = module.balancer.target_group_arn
+  execution_role_arn   = module.iam.ecs_execution_role_arn
+  task_role_arn        = module.iam.ecs_task_role_arn
+  aws_region           = var.aws_region
+  log_group_name       = module.observability.ecs_log_group_name
+
+  environment_variables = concat(
+    [for k, v in var.backend_env : { name = k, value = v }],
+    [
+      { name = "DB_HOST", value = module.database.cluster_endpoint },
+      { name = "DB_PORT", value = tostring(module.database.cluster_port) },
+      { name = "DB_NAME", value = module.database.database_name },
+      { name = "DB_USERNAME", value = module.database.master_username },
+      { name = "API_STAGE", value = var.api_stage },
+      { name = "AWS_COGNITO_USER_POOL_ID", value = module.auth.user_pool_id },
+      { name = "AWS_COGNITO_CLIENT_ID", value = module.auth.frontend_client_id },
+      { name = "IMAGES_BUCKET_NAME", value = module.storage_images.bucket_name },
+      { name = "IMAGES_BUCKET_REGION", value = var.aws_region },
+      { name = "IMAGES_BUCKET_REGIONAL_DOMAIN_NAME", value = module.storage_images.bucket_regional_domain_name },
+    ]
+  )
+
+  secrets = [
+    {
+      name      = "DB_PASSWORD"
+      valueFrom = module.db_password_secret.secret_arn
+    },
+    {
+      name      = "AWS_COGNITO_INTERNAL_AUTH_TOKEN"
+      valueFrom = module.shared_secrets.secret_arn
+    }
+  ]
+
+  tags       = local.default_tags
+  depends_on = [null_resource.push_placeholder_image]
+}
+
+module "auto_scaling" {
+  source      = "../../modules/compute/auto_scaling"
+  resource    = "service/${module.ecs.cluster_name}/${module.ecs.service_name}"
+  min         = var.ecs_auto_scaling.min
+  max         = var.ecs_auto_scaling.max
+  target      = var.ecs_auto_scaling.target
+  metric_type = var.ecs_auto_scaling.metric_type
+}

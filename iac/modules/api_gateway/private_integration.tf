@@ -10,6 +10,10 @@ resource "aws_api_gateway_method" "proxy" {
   http_method   = "ANY"
   authorization = "COGNITO_USER_POOLS"
   authorizer_id = aws_api_gateway_authorizer.cognito.id
+
+  request_parameters = {
+    "method.request.path.proxy" = true
+  }
 }
 
 resource "aws_api_gateway_integration" "proxy" {
@@ -22,4 +26,8 @@ resource "aws_api_gateway_integration" "proxy" {
   connection_type         = "VPC_LINK"
   connection_id           = aws_apigatewayv2_vpc_link.link_to_alb.id
   integration_target      = var.alb_arn
+
+  request_parameters = {
+    "integration.request.path.proxy" = "method.request.path.proxy"
+  }
 }

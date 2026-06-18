@@ -15,6 +15,10 @@ resource "aws_api_gateway_method" "auth_proxy" {
   resource_id   = aws_api_gateway_resource.auth_proxy.id
   http_method   = "ANY"
   authorization = "NONE"
+
+  request_parameters = {
+    "method.request.path.proxy" = true
+  }
 }
 
 resource "aws_api_gateway_integration" "auth_proxy" {
@@ -27,4 +31,8 @@ resource "aws_api_gateway_integration" "auth_proxy" {
   connection_type         = "VPC_LINK"
   connection_id           = aws_apigatewayv2_vpc_link.link_to_alb.id
   integration_target      = var.alb_arn
+
+  request_parameters = {
+    "integration.request.path.proxy" = "method.request.path.proxy"
+  }
 }
