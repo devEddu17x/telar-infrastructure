@@ -3,19 +3,31 @@ variable "name_prefix" {
   type        = string
 }
 
+variable "aws_region" {
+  description = "AWS region where the Cognito User Pool is deployed"
+  type        = string
+}
+
+variable "aws_profile" {
+  description = "AWS CLI profile name used for local-exec provisioners. Leave empty to use the default profile"
+  type        = string
+  default     = ""
+}
+
 variable "repository_url" {
   description = "HTTPS URL of the GitHub/GitLab repository containing the Next.js frontend source code"
   type        = string
 }
 
 variable "github_access_token" {
-  description = "Personal Access Token (classic) with repo and admin:repo_hook scopes for the GitHub repository"
+  description = "Personal Access Token with repo and admin:repo_hook scopes. Leave empty when using the Amplify GitHub App connection"
   type        = string
   sensitive   = true
+  default     = ""
 }
 
 variable "branch" {
-  description = "Git branch to deploy (e.g. main, dev)" 
+  description = "Git branch to deploy (e.g. main, dev)"
   type        = string
   default     = "develop"
 }
@@ -23,7 +35,7 @@ variable "branch" {
 variable "framework" {
   description = "Framework used for the frontend application"
   type        = string
-  default     = "Next.js - SSG"
+  default     = "Next.js - SSR"
 }
 
 variable "branch_stage" {
@@ -71,7 +83,13 @@ variable "cognito_client_id" {
 }
 
 variable "api_base_url" {
-  description = "Base URL of the backend API to expose to the Next.js app (e.g. https://api.example.com)"
+  description = "Base URL of the backend API (e.g. https://api.example.com)"
+  type        = string
+  default     = ""
+}
+
+variable "api_url" {
+  description = "Full URL of the backend API including stage and prefix (e.g. https://api.example.com/dev/api/v1)"
   type        = string
   default     = ""
 }
