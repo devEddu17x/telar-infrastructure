@@ -241,4 +241,39 @@ variable "api_cors_configuration" {
   default = {}
 }
 
+variable "ecs_container_image" {
+  description = "Docker image URI for the NestJS API. Leave empty to use the placeholder built from the ECR repository."
+  type        = string
+  default     = ""
+}
+
+variable "ecs_desired_count" {
+  description = "Initial number of ECS tasks"
+  type        = number
+  default     = 1
+}
+
+variable "ecs_task_cpu" {
+  description = "CPU units per task"
+  type        = string
+  default     = "1024"
+}
+
+variable "ecs_task_memory" {
+  description = "Memory per task"
+  type        = string
+  default     = "2048"
+}
+
+variable "ecs_auto_scaling" {
+  description = "Auto scaling configuration for ECS service"
+  type = object({
+    min         = optional(number, 1)
+    max         = optional(number, 4)
+    target      = optional(number, 70)
+    metric_type = optional(string, "ECSServiceAverageCPUUtilization")
+  })
+  default = {}
+}
+
 
