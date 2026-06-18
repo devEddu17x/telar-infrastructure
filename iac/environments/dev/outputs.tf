@@ -102,3 +102,18 @@ output "api_gateway_vpc_link_id" {
   description = "ID of the VPC Link"
   value       = module.api_gateway.vpc_link_id
 }
+
+output "frontend_system_app_id" {
+  description = "Amplify app ID for the system frontend"
+  value       = module.frontend_system.app_id
+}
+
+output "frontend_system_branch_url" {
+  description = "Public HTTPS URL for the deployed system frontend branch"
+  value       = module.frontend_system.branch_url
+}
+
+output "frontend_system_default_domain" {
+  description = "Default Amplify domain for the system frontend"
+  value       = module.frontend_system.default_domain
+}

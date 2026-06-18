@@ -105,3 +105,8 @@ ecs_auto_scaling = {
   min = 1
   max = 4
 }
+
+frontend_repository_url      = "your_repository_url"
+frontend_github_access_token = "your_github_token"
+frontend_branch              = "develop"
+frontend_node_version        = "22"
