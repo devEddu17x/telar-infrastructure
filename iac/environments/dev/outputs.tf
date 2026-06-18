@@ -19,22 +19,22 @@ output "cognito_frontend_client_id" {
 }
 
 output "firewall_api_web_acl_arn" {
-  description = "ARN of the WAFv2 Web ACL."
+  description = "ARN of the WAFv2 Web ACL for the API"
   value       = module.firewall_api.web_acl_arn
 }
 
 output "firewall_api_web_acl_id" {
-  description = "ID of the WAFv2 Web ACL"
+  description = "ID of the WAFv2 Web ACL for the API"
   value       = module.firewall_api.web_acl_id
 }
 
 output "firewall_api_web_acl_name" {
-  description = "Name of the WAFv2 Web ACL"
+  description = "Name of the WAFv2 Web ACL for the API"
   value       = module.firewall_api.web_acl_name
 }
 
 output "firewall_api_web_acl_capacity" {
-  description = "Web ACL Capacity Units (WCU) consumed by the configured rules"
+  description = "Web ACL Capacity Units (WCU) consumed by the API WAF"
   value       = module.firewall_api.web_acl_capacity
 }
 
