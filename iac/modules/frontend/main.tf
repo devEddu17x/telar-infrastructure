@@ -1,5 +1,5 @@
 resource "aws_amplify_app" "frontend" {
-  name         = "${var.name_prefix}-frontend"
+  name         = "${var.name_prefix}"
   repository   = var.repository_url
   platform     = "WEB_COMPUTE"
   access_token = var.github_access_token != "" ? var.github_access_token : null
@@ -29,16 +29,12 @@ resource "aws_amplify_app" "frontend" {
           - .next/cache/**/*
   YAML
 
-  environment_variables = {
-    NEXT_PUBLIC_COGNITO_USER_POOL_ID       = var.cognito_user_pool_id
-    NEXT_PUBLIC_COGNITO_USER_POOL_ENDPOINT = var.cognito_user_pool_endpoint
-    NEXT_PUBLIC_COGNITO_CLIENT_ID          = var.cognito_client_id
-    NEXT_PUBLIC_AWS_COGNITO_CLIENT_ID      = var.cognito_client_id
-    NEXT_PUBLIC_AWS_COGNITO_REGION         = var.aws_region
-    NEXT_PUBLIC_API_BASE_URL               = var.api_base_url
-    NEXT_PUBLIC_API_URL                    = var.api_url
-    _LIVE_UPDATES                          = jsonencode([{ name = "Node.js version", pkg = "node", type = "nvm", version = var.node_version }])
-  }
+  environment_variables = merge(
+    var.environment_variables,
+    {
+      _LIVE_UPDATES = jsonencode([{ name = "Node.js version", pkg = "node", type = "nvm", version = var.node_version }])
+    }
+  )
 
   auto_branch_creation_config {
     enable_auto_build           = true
