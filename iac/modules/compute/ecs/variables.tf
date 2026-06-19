@@ -96,6 +96,18 @@ variable "log_group_name" {
   type        = string
 }
 
+variable "container_health_check" {
+  description = "Container-level health check configuration"
+  type = object({
+    path         = optional(string, "/health")
+    interval     = optional(number, 30)
+    timeout      = optional(number, 5)
+    retries      = optional(number, 3)
+    start_period = optional(number, 30)
+  })
+  default = {}
+}
+
 variable "enable_container_insights" {
   description = "Enable CloudWatch Container Insights"
   type        = bool

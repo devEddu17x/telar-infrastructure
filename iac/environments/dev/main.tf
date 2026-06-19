@@ -197,6 +197,10 @@ module "ecs" {
   aws_region           = var.aws_region
   log_group_name       = module.observability.ecs_log_group_name
 
+  container_health_check = {
+    path = "/${var.api_prefix}/${var.api_version}/health"
+  }
+
   environment_variables = concat(
     [for k, v in var.backend_env : { name = k, value = v }],
     [
