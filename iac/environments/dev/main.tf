@@ -148,6 +148,8 @@ module "api_gateway" {
   source                          = "../../modules/api_gateway"
   name_prefix                     = local.name_prefix
   api_stage                       = var.api_stage
+  api_prefix                      = var.api_prefix
+  api_version                     = var.api_version
   cognito_user_pool_arn           = module.auth.user_pool_arn
   alb_arn                         = module.balancer.alb_arn
   alb_dns_name                    = module.balancer.alb_dns_name
