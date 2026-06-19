@@ -16,6 +16,12 @@ resource "aws_api_gateway_deployment" "main" {
       aws_api_gateway_integration.proxy.request_parameters,
       aws_api_gateway_integration.auth_proxy.request_parameters,
       aws_api_gateway_integration.docs_proxy.request_parameters,
+      aws_api_gateway_integration.proxy.uri,
+      aws_api_gateway_integration.auth_proxy.uri,
+      aws_api_gateway_integration.docs_proxy.uri,
+      aws_api_gateway_integration.health.uri,
+      aws_api_gateway_integration.docs.uri,
+      aws_api_gateway_integration.docs_json.uri,
       aws_api_gateway_authorizer.cognito.id,
       aws_api_gateway_resource.api.id,
       aws_api_gateway_resource.v1.id,
@@ -43,6 +49,10 @@ resource "aws_api_gateway_deployment" "main" {
       aws_api_gateway_integration_response.health_options.id,
       aws_api_gateway_integration_response.docs_options.id,
       aws_api_gateway_integration_response.docs_json_options.id,
+      aws_api_gateway_method.auth_proxy_options.id,
+      aws_api_gateway_integration.auth_proxy_options.id,
+      aws_api_gateway_method_response.auth_proxy_options.id,
+      aws_api_gateway_integration_response.auth_proxy_options.id,
     ]))
   }
 

@@ -228,6 +228,18 @@ variable "api_stage" {
   type        = string
 }
 
+variable "api_prefix" {
+  description = "First path segment of the API route tree"
+  type        = string
+  default     = "api"
+}
+
+variable "api_version" {
+  description = "Version path segment of the API route tree"
+  type        = string
+  default     = "v1"
+}
+
 variable "api_cors_configuration" {
   description = "CORS configuration for API Gateway"
   type = object({
