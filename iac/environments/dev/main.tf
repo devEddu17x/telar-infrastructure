@@ -250,12 +250,12 @@ module "frontend_system" {
   node_version        = var.frontend_node_version
   framework           = "Next.js - SSR"
 
-  cognito_user_pool_id       = module.auth.user_pool_id
-  cognito_user_pool_endpoint = module.auth.user_pool_endpoint
-  cognito_client_id          = module.auth.frontend_client_id
-
-  api_base_url = module.api_gateway.api_endpoint
-  api_url      = "${module.api_gateway.api_endpoint}/${var.api_stage}/${var.backend_env["API_PREFIX"]}"
+  environment_variables = {
+    NODE_ENV                       = "development"
+    NEXT_PUBLIC_AWS_COGNITO_REGION = var.aws_region
+    NEXT_PUBLIC_AWS_COGNITO_CLIENT_ID = module.auth.frontend_client_id
+    NEXT_PUBLIC_API_URL            = "${module.api_gateway.api_endpoint}/${var.api_stage}/${var.api_version}/${var.api_prefix}"
+  }
 
   tags = local.default_tags
 }
@@ -272,6 +272,10 @@ module "landing_page" {
   branch_stage        = "DEVELOPMENT"
   node_version        = var.landing_page_node_version
   framework           = "Next.js - SSR"
+
+  environment_variables = {
+    NEXT_PUBLIC_REDIRECT_URL = module.frontend_system.branch_url
+  }
 
   tags = local.default_tags
 }
