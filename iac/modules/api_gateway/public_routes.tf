@@ -1,13 +1,13 @@
 resource "aws_api_gateway_resource" "api" {
   rest_api_id = aws_api_gateway_rest_api.main.id
   parent_id   = aws_api_gateway_rest_api.main.root_resource_id
-  path_part   = "api"
+  path_part   = var.api_prefix
 }
 
 resource "aws_api_gateway_resource" "v1" {
   rest_api_id = aws_api_gateway_rest_api.main.id
   parent_id   = aws_api_gateway_resource.api.id
-  path_part   = "v1"
+  path_part   = var.api_version
 }
 
 resource "aws_api_gateway_resource" "health" {
@@ -29,7 +29,7 @@ resource "aws_api_gateway_integration" "health" {
   http_method             = aws_api_gateway_method.health.http_method
   type                    = "HTTP_PROXY"
   integration_http_method = "ANY"
-  uri                     = "http://${var.alb_dns_name}/api/v1/health"
+  uri                     = "http://${var.alb_dns_name}/${var.api_prefix}/${var.api_version}/health"
   connection_type         = "VPC_LINK"
   connection_id           = aws_apigatewayv2_vpc_link.link_to_alb.id
   integration_target      = var.alb_arn
@@ -54,7 +54,7 @@ resource "aws_api_gateway_integration" "docs" {
   http_method             = aws_api_gateway_method.docs.http_method
   type                    = "HTTP_PROXY"
   integration_http_method = "ANY"
-  uri                     = "http://${var.alb_dns_name}/api/v1/docs"
+  uri                     = "http://${var.alb_dns_name}/${var.api_prefix}/${var.api_version}/docs"
   connection_type         = "VPC_LINK"
   connection_id           = aws_apigatewayv2_vpc_link.link_to_alb.id
   integration_target      = var.alb_arn
@@ -83,7 +83,7 @@ resource "aws_api_gateway_integration" "docs_proxy" {
   http_method             = aws_api_gateway_method.docs_proxy.http_method
   type                    = "HTTP_PROXY"
   integration_http_method = "ANY"
-  uri                     = "http://${var.alb_dns_name}/api/v1/docs/{proxy}"
+  uri                     = "http://${var.alb_dns_name}/${var.api_prefix}/${var.api_version}/docs/{proxy}"
   connection_type         = "VPC_LINK"
   connection_id           = aws_apigatewayv2_vpc_link.link_to_alb.id
   integration_target      = var.alb_arn
@@ -112,7 +112,7 @@ resource "aws_api_gateway_integration" "docs_json" {
   http_method             = aws_api_gateway_method.docs_json.http_method
   type                    = "HTTP_PROXY"
   integration_http_method = "ANY"
-  uri                     = "http://${var.alb_dns_name}/api/v1/docs-json"
+  uri                     = "http://${var.alb_dns_name}/${var.api_prefix}/${var.api_version}/docs-json"
   connection_type         = "VPC_LINK"
   connection_id           = aws_apigatewayv2_vpc_link.link_to_alb.id
   integration_target      = var.alb_arn
