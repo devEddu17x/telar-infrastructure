@@ -240,7 +240,7 @@ module "auto_scaling" {
 module "frontend_system" {
   source = "../../modules/frontend"
 
-  name_prefix         = local.name_prefix
+  name_prefix         = "${local.name_prefix}-system-frontend"
   aws_region          = var.aws_region
   aws_profile         = var.aws_profile != null ? var.aws_profile : ""
   repository_url      = var.frontend_repository_url
@@ -256,6 +256,22 @@ module "frontend_system" {
 
   api_base_url = module.api_gateway.api_endpoint
   api_url      = "${module.api_gateway.api_endpoint}/${var.api_stage}/${var.backend_env["API_PREFIX"]}"
+
+  tags = local.default_tags
+}
+
+module "landing_page" {
+  source = "../../modules/frontend"
+
+  name_prefix         = "${local.name_prefix}-landing-page"
+  aws_region          = var.aws_region
+  aws_profile         = var.aws_profile != null ? var.aws_profile : ""
+  repository_url      = var.landing_page_repository_url
+  github_access_token = var.landing_page_github_access_token
+  branch              = var.landing_page_branch
+  branch_stage        = "DEVELOPMENT"
+  node_version        = var.landing_page_node_version
+  framework           = "Next.js - SSR"
 
   tags = local.default_tags
 }

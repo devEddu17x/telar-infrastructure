@@ -85,7 +85,9 @@ balancer_health_check = {
 balancer_deregistration_delay = 30
 balancer_logs_force_destroy   = true
 
-api_stage = "dev"
+api_stage   = "dev"
+api_prefix  = "api"
+api_version = "v1"
 
 api_cors_configuration = {
   allow_credentials = true
@@ -110,3 +112,10 @@ frontend_repository_url      = "your_repository_url"
 frontend_github_access_token = "your_github_token"
 frontend_branch              = "develop"
 frontend_node_version        = "22"
+
+
+landing_page_repository_url      = "your_repository_url"
+landing_page_github_access_token = "your_github_token"
+landing_page_branch              = "develop"
+landing_page_node_version        = "22"
+
