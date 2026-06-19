@@ -8,6 +8,18 @@ variable "api_stage" {
   type        = string
 }
 
+variable "api_prefix" {
+  description = "First path segment of the API route tree"
+  type        = string
+  default     = "api"
+}
+
+variable "api_version" {
+  description = "Version path segment of the API route tree"
+  type        = string
+  default     = "v1"
+}
+
 variable "cognito_user_pool_arn" {
   description = "ARN of the Cognito User Pool"
   type        = string
