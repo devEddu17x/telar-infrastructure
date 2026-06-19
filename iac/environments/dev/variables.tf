@@ -311,3 +311,27 @@ variable "frontend_node_version" {
   type        = string
   default     = "20"
 }
+
+
+variable "landing_page_repository_url" {
+  description = "HTTPS URL of the GitHub repository containing the landing page source code"
+  type        = string
+}
+
+variable "landing_page_github_access_token" {
+  description = "Personal Access Token with repo and admin:repo_hook scopes. Leave empty when using the Amplify GitHub App connection"
+  type        = string
+  sensitive   = true
+}
+
+variable "landing_page_branch" {
+  description = "Git branch to deploy for the landing page"
+  type        = string
+  default     = "main"
+}
+
+variable "landing_page_node_version" {
+  description = "Node.js version to use in the Amplify build environment for the landing page"
+  type        = string
+  default     = "20"
+}

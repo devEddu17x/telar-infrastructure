@@ -240,7 +240,7 @@ module "auto_scaling" {
 module "frontend_system" {
   source = "../../modules/frontend"
 
-  name_prefix         = local.name_prefix
+  name_prefix         = "${local.name_prefix}-system-frontend"
   aws_region          = var.aws_region
   aws_profile         = var.aws_profile != null ? var.aws_profile : ""
   repository_url      = var.frontend_repository_url
@@ -250,12 +250,32 @@ module "frontend_system" {
   node_version        = var.frontend_node_version
   framework           = "Next.js - SSR"
 
-  cognito_user_pool_id       = module.auth.user_pool_id
-  cognito_user_pool_endpoint = module.auth.user_pool_endpoint
-  cognito_client_id          = module.auth.frontend_client_id
+  environment_variables = {
+    NODE_ENV                       = "development"
+    NEXT_PUBLIC_AWS_COGNITO_REGION = var.aws_region
+    NEXT_PUBLIC_AWS_COGNITO_CLIENT_ID = module.auth.frontend_client_id
+    NEXT_PUBLIC_API_URL            = "${module.api_gateway.api_endpoint}/${var.api_stage}/${var.api_version}/${var.api_prefix}"
+  }
 
-  api_base_url = module.api_gateway.api_endpoint
-  api_url      = "${module.api_gateway.api_endpoint}/${var.api_stage}/${var.backend_env["API_PREFIX"]}"
+  tags = local.default_tags
+}
+
+module "landing_page" {
+  source = "../../modules/frontend"
+
+  name_prefix         = "${local.name_prefix}-landing-page"
+  aws_region          = var.aws_region
+  aws_profile         = var.aws_profile != null ? var.aws_profile : ""
+  repository_url      = var.landing_page_repository_url
+  github_access_token = var.landing_page_github_access_token
+  branch              = var.landing_page_branch
+  branch_stage        = "DEVELOPMENT"
+  node_version        = var.landing_page_node_version
+  framework           = "Next.js - SSR"
+
+  environment_variables = {
+    NEXT_PUBLIC_REDIRECT_URL = module.frontend_system.branch_url
+  }
 
   tags = local.default_tags
 }

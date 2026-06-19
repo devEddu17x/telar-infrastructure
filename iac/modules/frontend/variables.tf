@@ -67,31 +67,10 @@ variable "web_acl_arn" {
   default     = ""
 }
 
-variable "cognito_user_pool_id" {
-  description = "Cognito User Pool ID to expose to the Next.js app as an environment variable"
-  type        = string
-}
-
-variable "cognito_user_pool_endpoint" {
-  description = "Cognito User Pool endpoint (issuer URL) to expose to the Next.js app"
-  type        = string
-}
-
-variable "cognito_client_id" {
-  description = "Cognito App Client ID to expose to the Next.js app as an environment variable"
-  type        = string
-}
-
-variable "api_base_url" {
-  description = "Base URL of the backend API (e.g. https://api.example.com)"
-  type        = string
-  default     = ""
-}
-
-variable "api_url" {
-  description = "Full URL of the backend API including stage and prefix (e.g. https://api.example.com/dev/api/v1)"
-  type        = string
-  default     = ""
+variable "environment_variables" {
+  description = "Map of environment variables to inject into the Amplify app. The module always adds _LIVE_UPDATES automatically."
+  type        = map(string)
+  default     = {}
 }
 
 variable "tags" {
