@@ -55,6 +55,12 @@ variable "alb_access_logs_prefix" {
   default     = ""
 }
 
+variable "manage_bucket_policy" {
+  description = "Manage the bucket policy"
+  type        = bool
+  default     = true
+}
+
 variable "tags" {
   description = "Common tags applied to all storage resources"
   type        = map(string)
