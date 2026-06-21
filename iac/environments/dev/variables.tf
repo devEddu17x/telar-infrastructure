@@ -288,50 +288,34 @@ variable "ecs_auto_scaling" {
   default = {}
 }
 
-variable "frontend_repository_url" {
-  description = "HTTPS URL of the GitHub repository containing the system frontend source code"
-  type        = string
+variable "frontend_system_static" {
+  description = "Static hosting settings for the system frontend"
+  type = object({
+    enabled            = optional(bool, true)
+    force_destroy      = optional(bool, false)
+    versioning_enabled = optional(bool, false)
+    price_class        = optional(string, "PriceClass_100")
+  })
+  default = {}
 }
 
-variable "frontend_github_access_token" {
-  description = "Personal Access Token with repo and admin:repo_hook scopes. Leave empty when using the Amplify GitHub App connection"
-  type        = string
-  sensitive   = true
-  default     = ""
+variable "landing_page_static" {
+  description = "Static hosting settings for the landing page"
+  type = object({
+    enabled            = optional(bool, true)
+    force_destroy      = optional(bool, false)
+    versioning_enabled = optional(bool, false)
+    price_class        = optional(string, "PriceClass_100")
+  })
+  default = {}
 }
-
-variable "frontend_branch" {
-  description = "Git branch to deploy for the system frontend"
-  type        = string
-  default     = "main"
-}
-
-variable "frontend_node_version" {
-  description = "Node.js version to use in the Amplify build environment for the system frontend"
-  type        = string
-  default     = "20"
-}
-
-
-variable "landing_page_repository_url" {
-  description = "HTTPS URL of the GitHub repository containing the landing page source code"
-  type        = string
-}
-
-variable "landing_page_github_access_token" {
-  description = "Personal Access Token with repo and admin:repo_hook scopes. Leave empty when using the Amplify GitHub App connection"
-  type        = string
-  sensitive   = true
-}
-
-variable "landing_page_branch" {
-  description = "Git branch to deploy for the landing page"
-  type        = string
-  default     = "main"
-}
-
-variable "landing_page_node_version" {
-  description = "Node.js version to use in the Amplify build environment for the landing page"
-  type        = string
-  default     = "20"
+variable "images_static" {
+  description = "Static hosting settings for the images"
+  type = object({
+    enabled            = optional(bool, true)
+    force_destroy      = optional(bool, false)
+    versioning_enabled = optional(bool, false)
+    price_class        = optional(string, "PriceClass_100")
+  })
+  default = {}
 }
