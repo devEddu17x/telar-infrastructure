@@ -17,13 +17,14 @@ module "auth" {
 }
 
 module "storage_images" {
-  source             = "../../modules/storage"
-  name_prefix        = local.name_prefix
-  bucket_suffix      = "images"
-  force_destroy      = var.s3_images_force_destroy
-  cors               = var.s3_images_cors
-  versioning_enabled = var.s3_images_versioning_enabled
-  tags               = local.default_tags
+  source               = "../../modules/storage"
+  name_prefix          = local.name_prefix
+  bucket_suffix        = "images"
+  force_destroy        = var.s3_images_force_destroy
+  cors                 = var.s3_images_cors
+  versioning_enabled   = var.s3_images_versioning_enabled
+  manage_bucket_policy = false
+  tags                 = local.default_tags
 }
 
 module "ecr_api" {
@@ -181,6 +182,24 @@ resource "null_resource" "push_placeholder_image" {
   }
 }
 
+module "cdn_images" {
+  source = "../../modules/cdn/assets"
+
+  name_prefix                 = "${local.name_prefix}-images"
+  bucket_regional_domain_name = module.storage_images.bucket_regional_domain_name
+  price_class                 = var.images_static.price_class
+  enabled                     = var.images_static.enabled
+  tags                        = local.default_tags
+}
+
+module "images_bucket_policy" {
+  source = "../../modules/integration/cloudfront_s3_policy"
+
+  bucket_id        = module.storage_images.bucket_id
+  bucket_arn       = module.storage_images.bucket_arn
+  distribution_arn = module.cdn_images.distribution_arn
+}
+
 module "ecs" {
   source               = "../../modules/compute/ecs"
   name_prefix          = local.name_prefix
@@ -211,9 +230,9 @@ module "ecs" {
       { name = "API_STAGE", value = var.api_stage },
       { name = "AWS_COGNITO_USER_POOL_ID", value = module.auth.user_pool_id },
       { name = "AWS_COGNITO_CLIENT_ID", value = module.auth.frontend_client_id },
-      { name = "IMAGES_BUCKET_NAME", value = module.storage_images.bucket_name },
-      { name = "IMAGES_BUCKET_REGION", value = var.aws_region },
-      { name = "IMAGES_BUCKET_REGIONAL_DOMAIN_NAME", value = module.storage_images.bucket_regional_domain_name },
+      { name = "STORAGE_BUCKET_NAME", value = module.storage_images.bucket_name },
+      { name = "STORAGE_REGION", value = var.aws_region },
+      { name = "STORAGE_PUBLIC_URL", value = module.cdn_images.distribution_domain_name },
     ]
   )
 
@@ -241,45 +260,64 @@ module "auto_scaling" {
   metric_type = var.ecs_auto_scaling.metric_type
 }
 
-module "frontend_system" {
-  source = "../../modules/frontend"
+module "storage_frontend_system" {
+  source = "../../modules/storage"
 
-  name_prefix         = "${local.name_prefix}-system-frontend"
-  aws_region          = var.aws_region
-  aws_profile         = var.aws_profile != null ? var.aws_profile : ""
-  repository_url      = var.frontend_repository_url
-  github_access_token = var.frontend_github_access_token
-  branch              = var.frontend_branch
-  branch_stage        = "DEVELOPMENT"
-  node_version        = var.frontend_node_version
-  framework           = "Next.js - SSR"
-
-  environment_variables = {
-    NODE_ENV                       = "development"
-    NEXT_PUBLIC_AWS_COGNITO_REGION = var.aws_region
-    NEXT_PUBLIC_AWS_COGNITO_CLIENT_ID = module.auth.frontend_client_id
-    NEXT_PUBLIC_API_URL            = "${module.api_gateway.api_endpoint}/${var.api_stage}/${var.api_version}/${var.api_prefix}"
-  }
-
-  tags = local.default_tags
+  name_prefix          = local.name_prefix
+  bucket_suffix        = "system-frontend"
+  force_destroy        = var.frontend_system_static.force_destroy
+  versioning_enabled   = var.frontend_system_static.versioning_enabled
+  cors                 = { enabled = false, allowed_origins = [] }
+  manage_bucket_policy = false
+  tags                 = local.default_tags
 }
 
-module "landing_page" {
-  source = "../../modules/frontend"
+module "cdn_frontend_system" {
+  source = "../../modules/cdn/static_site"
 
-  name_prefix         = "${local.name_prefix}-landing-page"
-  aws_region          = var.aws_region
-  aws_profile         = var.aws_profile != null ? var.aws_profile : ""
-  repository_url      = var.landing_page_repository_url
-  github_access_token = var.landing_page_github_access_token
-  branch              = var.landing_page_branch
-  branch_stage        = "DEVELOPMENT"
-  node_version        = var.landing_page_node_version
-  framework           = "Next.js - SSR"
+  name_prefix                 = "${local.name_prefix}-system-frontend"
+  bucket_regional_domain_name = module.storage_frontend_system.bucket_regional_domain_name
+  price_class                 = var.frontend_system_static.price_class
+  enabled                     = var.frontend_system_static.enabled
+  default_root_object         = "index.html"
+  tags                        = local.default_tags
+}
 
-  environment_variables = {
-    NEXT_PUBLIC_REDIRECT_URL = module.frontend_system.branch_url
-  }
+module "frontend_system_bucket_policy" {
+  source = "../../modules/integration/cloudfront_s3_policy"
 
-  tags = local.default_tags
+  bucket_id        = module.storage_frontend_system.bucket_id
+  bucket_arn       = module.storage_frontend_system.bucket_arn
+  distribution_arn = module.cdn_frontend_system.distribution_arn
+}
+
+module "storage_landing_page" {
+  source = "../../modules/storage"
+
+  name_prefix          = local.name_prefix
+  bucket_suffix        = "landing-page"
+  force_destroy        = var.landing_page_static.force_destroy
+  versioning_enabled   = var.landing_page_static.versioning_enabled
+  cors                 = { enabled = false, allowed_origins = [] }
+  manage_bucket_policy = false
+  tags                 = local.default_tags
+}
+
+module "cdn_landing_page" {
+  source = "../../modules/cdn/static_site"
+
+  name_prefix                 = "${local.name_prefix}-landing-page"
+  bucket_regional_domain_name = module.storage_landing_page.bucket_regional_domain_name
+  price_class                 = var.landing_page_static.price_class
+  enabled                     = var.landing_page_static.enabled
+  default_root_object         = "index.html"
+  tags                        = local.default_tags
+}
+
+module "landing_page_bucket_policy" {
+  source = "../../modules/integration/cloudfront_s3_policy"
+
+  bucket_id        = module.storage_landing_page.bucket_id
+  bucket_arn       = module.storage_landing_page.bucket_arn
+  distribution_arn = module.cdn_landing_page.distribution_arn
 }
