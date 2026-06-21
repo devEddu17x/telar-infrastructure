@@ -20,5 +20,5 @@ output "bucket_regional_domain_name" {
 
 output "bucket_policy_id" {
   description = "ID of the bucket policy"
-  value       = var.alb_access_logs_enabled ? aws_s3_bucket_policy.alb_logs[0].id : aws_s3_bucket_policy.https_only[0].id
+  value       = var.manage_bucket_policy ? (var.alb_access_logs_enabled ? aws_s3_bucket_policy.alb_logs[0].id : aws_s3_bucket_policy.https_only[0].id) : null
 }
