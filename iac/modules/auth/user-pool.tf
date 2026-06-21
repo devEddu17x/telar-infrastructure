@@ -28,7 +28,7 @@ resource "aws_cognito_user_pool" "pool" {
 
   schema {
     name                = "tenant_id"
-    mutable             = false
+    mutable             = true
     required            = false
     attribute_data_type = "String"
   }
