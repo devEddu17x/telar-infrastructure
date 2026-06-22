@@ -22,3 +22,13 @@ output "backend_github_oidc_role_name" {
   description = "Name of the backend deployment role"
   value       = module.backend_github_oidc_role.role_name
 }
+
+output "landing_github_oidc_role_arn" {
+  description = "ARN of the landing page deployment role"
+  value       = module.landing_github_oidc_role.role_arn
+}
+
+output "landing_github_oidc_role_name" {
+  description = "Name of the landing page deployment role"
+  value       = module.landing_github_oidc_role.role_name
+}

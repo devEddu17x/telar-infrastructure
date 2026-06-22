@@ -64,3 +64,27 @@ module "backend_github_oidc_role" {
 
   tags = local.default_tags
 }
+
+module "landing_github_oidc_role" {
+  source = "../modules/oidc/landing_role"
+
+  name_prefix  = local.name_prefix
+  role_suffix  = "landing-deploy"
+  provider_arn = aws_iam_openid_connect_provider.github.arn
+  provider_url = replace(aws_iam_openid_connect_provider.github.url, "https://", "")
+  repository   = var.landing_github_repository
+  branches     = var.landing_github_branches
+  environments = var.landing_github_environments
+
+  ssm_parameter_arns = ["arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter/${var.project_name}-*/${var.landing_parameter_path}/*"]
+
+  s3_bucket_arns = [
+    "arn:aws:s3:::${var.project_name}-*-landing-page-${data.aws_caller_identity.current.account_id}"
+  ]
+
+  cloudfront_distribution_arns = [
+    "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/*"
+  ]
+
+  tags = local.default_tags
+}

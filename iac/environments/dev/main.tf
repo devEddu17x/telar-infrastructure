@@ -359,3 +359,15 @@ module "landing_page_bucket_policy" {
   bucket_arn       = module.storage_landing_page.bucket_arn
   distribution_arn = module.cdn_landing_page.distribution_arn
 }
+
+module "landing_page_parameters" {
+  source = "../../modules/security/ssm_parameters"
+
+  name_prefix = "${local.name_prefix}/landing-page"
+  parameters = {
+    NEXT_PUBLIC_REDIRECT_URL  = "https://${module.cdn_frontend_system.distribution_domain_name}"
+    LANDING_BUCKET_NAME       = module.storage_landing_page.bucket_name
+    LANDING_DISTRIBUTION_ID   = module.cdn_landing_page.distribution_id
+  }
+  tags = local.default_tags
+}

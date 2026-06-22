@@ -152,3 +152,8 @@ output "landing_page_domain_name" {
   description = "CloudFront domain for the landing page"
   value       = module.cdn_landing_page.distribution_domain_name
 }
+
+output "landing_page_parameter_names" {
+  description = "SSM parameter names for the landing page"
+  value       = module.landing_page_parameters.parameter_names
+}
