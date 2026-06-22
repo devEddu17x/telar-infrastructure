@@ -103,6 +103,11 @@ output "api_gateway_vpc_link_id" {
   value       = module.api_gateway.vpc_link_id
 }
 
+output "backend_deploy_parameter_names" {
+  description = "SSM parameter names for backend deployment"
+  value       = module.backend_deploy_parameters.parameter_names
+}
+
 output "images_distribution_id" {
   description = "CloudFront distribution ID for images"
   value       = module.cdn_images.distribution_id
@@ -126,6 +131,11 @@ output "frontend_system_distribution_id" {
 output "frontend_system_domain_name" {
   description = "CloudFront domain for the system frontend"
   value       = module.cdn_frontend_system.distribution_domain_name
+}
+
+output "frontend_system_parameter_names" {
+  description = "SSM parameter names for the system frontend"
+  value       = module.frontend_system_parameters.parameter_names
 }
 
 output "landing_page_bucket_name" {
