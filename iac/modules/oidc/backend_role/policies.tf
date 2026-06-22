@@ -72,12 +72,19 @@ data "aws_iam_policy_document" "deploy" {
   }
 
   statement {
-    sid = "ManageBackendTaskDefinition"
+    sid = "DescribeBackendTaskDefinitions"
     actions = [
       "ecs:DescribeTaskDefinition",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid = "RegisterBackendTaskDefinition"
+    actions = [
       "ecs:RegisterTaskDefinition",
     ]
-    resources = var.ecs_task_definition_arns
+    resources = ["*"]
   }
 
   statement {
