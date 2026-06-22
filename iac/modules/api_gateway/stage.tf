@@ -6,6 +6,7 @@ resource "aws_api_gateway_deployment" "main" {
       aws_api_gateway_resource.proxy.id,
       aws_api_gateway_resource.auth.id,
       aws_api_gateway_resource.auth_proxy.id,
+      var.cors_configuration,
       aws_api_gateway_method.proxy.id,
       aws_api_gateway_method.auth_proxy.id,
       aws_api_gateway_method.proxy.request_parameters,
@@ -53,6 +54,10 @@ resource "aws_api_gateway_deployment" "main" {
       aws_api_gateway_integration.auth_proxy_options.id,
       aws_api_gateway_method_response.auth_proxy_options.id,
       aws_api_gateway_integration_response.auth_proxy_options.id,
+      aws_api_gateway_method.proxy_options.id,
+      aws_api_gateway_integration.proxy_options.id,
+      aws_api_gateway_method_response.proxy_options.id,
+      aws_api_gateway_integration_response.proxy_options.id,
     ]))
   }
 
