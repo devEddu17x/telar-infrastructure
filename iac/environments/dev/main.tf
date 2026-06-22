@@ -159,8 +159,16 @@ module "api_gateway" {
   waf_web_acl_arn                 = module.firewall_api.web_acl_arn
   access_log_group_arn            = module.observability.api_gateway_access_log_group_arn
   api_gateway_cloudwatch_role_arn = module.iam.api_gateway_cloudwatch_role_arn
-  cors_configuration              = var.api_cors_configuration
-  tags                            = local.default_tags
+  cors_configuration = merge(var.api_cors_configuration, {
+    allow_origins = distinct(concat(
+      var.api_cors_configuration.allow_origins,
+      [
+        "https://${module.cdn_frontend_system.distribution_domain_name}",
+        "https://${module.cdn_landing_page.distribution_domain_name}"
+      ]
+    ))
+  })
+  tags = local.default_tags
 }
 
 resource "null_resource" "push_placeholder_image" {
@@ -311,7 +319,7 @@ module "frontend_system_parameters" {
 
   name_prefix = "${local.name_prefix}/frontend"
   parameters = {
-    NEXT_PUBLIC_API_URL               = "${module.api_gateway.api_endpoint}/${var.api_stage}/${var.api_version}/${var.api_prefix}"
+    NEXT_PUBLIC_API_URL               = "${module.api_gateway.api_endpoint}/${var.api_prefix}/${var.api_version}"
     NEXT_PUBLIC_AWS_COGNITO_REGION    = var.aws_region
     NEXT_PUBLIC_AWS_COGNITO_CLIENT_ID = module.auth.frontend_client_id
     ASSETS_HOSTNAME                   = module.cdn_images.distribution_domain_name

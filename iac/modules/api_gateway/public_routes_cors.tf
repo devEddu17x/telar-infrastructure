@@ -38,18 +38,9 @@ resource "aws_api_gateway_integration_response" "health_options" {
   http_method = aws_api_gateway_method.health_options.http_method
   status_code = aws_api_gateway_method_response.health_options.status_code
 
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers"     = "'${join(",", var.cors_configuration.allow_headers)}'"
-    "method.response.header.Access-Control-Allow-Methods"     = "'${join(",", var.cors_configuration.allow_methods)}'"
-    "method.response.header.Access-Control-Allow-Origin"      = "'${join(",", var.cors_configuration.allow_origins)}'"
-    "method.response.header.Access-Control-Allow-Credentials" = "'${tostring(var.cors_configuration.allow_credentials)}'"
-    "method.response.header.Access-Control-Max-Age"           = "'${tostring(var.cors_configuration.max_age)}'"
-    "method.response.header.Access-Control-Expose-Headers"    = "'${join(",", var.cors_configuration.expose_headers)}'"
-  }
+  response_parameters = local.cors_response_parameters
 
-  response_templates = {
-    "application/json" = ""
-  }
+  response_templates = local.cors_response_templates
 }
 
 resource "aws_api_gateway_method" "docs_options" {
@@ -92,18 +83,9 @@ resource "aws_api_gateway_integration_response" "docs_options" {
   http_method = aws_api_gateway_method.docs_options.http_method
   status_code = aws_api_gateway_method_response.docs_options.status_code
 
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers"     = "'${join(",", var.cors_configuration.allow_headers)}'"
-    "method.response.header.Access-Control-Allow-Methods"     = "'${join(",", var.cors_configuration.allow_methods)}'"
-    "method.response.header.Access-Control-Allow-Origin"      = "'${join(",", var.cors_configuration.allow_origins)}'"
-    "method.response.header.Access-Control-Allow-Credentials" = "'${tostring(var.cors_configuration.allow_credentials)}'"
-    "method.response.header.Access-Control-Max-Age"           = "'${tostring(var.cors_configuration.max_age)}'"
-    "method.response.header.Access-Control-Expose-Headers"    = "'${join(",", var.cors_configuration.expose_headers)}'"
-  }
+  response_parameters = local.cors_response_parameters
 
-  response_templates = {
-    "application/json" = ""
-  }
+  response_templates = local.cors_response_templates
 }
 
 resource "aws_api_gateway_method" "docs_json_options" {
@@ -146,16 +128,7 @@ resource "aws_api_gateway_integration_response" "docs_json_options" {
   http_method = aws_api_gateway_method.docs_json_options.http_method
   status_code = aws_api_gateway_method_response.docs_json_options.status_code
 
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers"     = "'${join(",", var.cors_configuration.allow_headers)}'"
-    "method.response.header.Access-Control-Allow-Methods"     = "'${join(",", var.cors_configuration.allow_methods)}'"
-    "method.response.header.Access-Control-Allow-Origin"      = "'${join(",", var.cors_configuration.allow_origins)}'"
-    "method.response.header.Access-Control-Allow-Credentials" = "'${tostring(var.cors_configuration.allow_credentials)}'"
-    "method.response.header.Access-Control-Max-Age"           = "'${tostring(var.cors_configuration.max_age)}'"
-    "method.response.header.Access-Control-Expose-Headers"    = "'${join(",", var.cors_configuration.expose_headers)}'"
-  }
+  response_parameters = local.cors_response_parameters
 
-  response_templates = {
-    "application/json" = ""
-  }
+  response_templates = local.cors_response_templates
 }
