@@ -251,6 +251,21 @@ module "ecs" {
   depends_on = [null_resource.push_placeholder_image]
 }
 
+module "backend_deploy_parameters" {
+  source = "../../modules/security/ssm_parameters"
+
+  name_prefix = "${local.name_prefix}/backend/deploy"
+  parameters = {
+    AWS_REGION              = var.aws_region
+    ECR_REPOSITORY_NAME     = module.ecr_api.repository_name
+    ECR_REPOSITORY_URL      = module.ecr_api.repository_url
+    ECS_CLUSTER_NAME        = module.ecs.cluster_name
+    ECS_SERVICE_NAME        = module.ecs.service_name
+    ECS_TASK_DEFINITION_ARN = module.ecs.task_definition_arn
+  }
+  tags = local.default_tags
+}
+
 module "auto_scaling" {
   source      = "../../modules/compute/auto_scaling"
   resource    = "service/${module.ecs.cluster_name}/${module.ecs.service_name}"
@@ -289,6 +304,21 @@ module "frontend_system_bucket_policy" {
   bucket_id        = module.storage_frontend_system.bucket_id
   bucket_arn       = module.storage_frontend_system.bucket_arn
   distribution_arn = module.cdn_frontend_system.distribution_arn
+}
+
+module "frontend_system_parameters" {
+  source = "../../modules/security/ssm_parameters"
+
+  name_prefix = "${local.name_prefix}/frontend"
+  parameters = {
+    NEXT_PUBLIC_API_URL               = "${module.api_gateway.api_endpoint}/${var.api_stage}/${var.api_version}/${var.api_prefix}"
+    NEXT_PUBLIC_AWS_COGNITO_REGION    = var.aws_region
+    NEXT_PUBLIC_AWS_COGNITO_CLIENT_ID = module.auth.frontend_client_id
+    ASSETS_HOSTNAME                   = module.cdn_images.distribution_domain_name
+    FRONTEND_BUCKET_NAME              = module.storage_frontend_system.bucket_name
+    FRONTEND_DISTRIBUTION_ID          = module.cdn_frontend_system.distribution_id
+  }
+  tags = local.default_tags
 }
 
 module "storage_landing_page" {
