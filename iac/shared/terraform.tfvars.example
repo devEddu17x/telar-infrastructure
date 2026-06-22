@@ -1,0 +1,13 @@
+aws_region  = "us-east-1"
+aws_profile = "your-aws-profile"
+
+project_name = "telar"
+environment  = "shared"
+
+frontend_github_repository   = "owner/frontend-repository"
+frontend_github_environments = ["dev"]
+frontend_github_branches     = []
+
+backend_github_repository   = "owner/backend-repository"
+backend_github_environments = ["dev"]
+backend_github_branches     = []
