@@ -1,6 +1,5 @@
-# Política solo HTTPS para buckets normales (no ALB logs)
 resource "aws_s3_bucket_policy" "https_only" {
-  count = var.alb_access_logs_enabled ? 0 : 1
+  count = var.manage_bucket_policy && !var.alb_access_logs_enabled ? 1 : 0
 
   bucket = aws_s3_bucket.this.id
 
@@ -27,7 +26,7 @@ resource "aws_s3_bucket_policy" "https_only" {
 }
 
 resource "aws_s3_bucket_policy" "alb_logs" {
-  count = var.alb_access_logs_enabled ? 1 : 0
+  count = var.manage_bucket_policy && var.alb_access_logs_enabled ? 1 : 0
 
   bucket = aws_s3_bucket.this.id
 

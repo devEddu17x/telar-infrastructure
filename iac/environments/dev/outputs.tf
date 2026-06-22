@@ -103,17 +103,42 @@ output "api_gateway_vpc_link_id" {
   value       = module.api_gateway.vpc_link_id
 }
 
-output "frontend_system_app_id" {
-  description = "Amplify app ID for the system frontend"
-  value       = module.frontend_system.app_id
+output "images_distribution_id" {
+  description = "CloudFront distribution ID for images"
+  value       = module.cdn_images.distribution_id
 }
 
-output "frontend_system_branch_url" {
-  description = "Public HTTPS URL for the deployed system frontend branch"
-  value       = module.frontend_system.branch_url
+output "images_domain_name" {
+  description = "CloudFront domain for images"
+  value       = module.cdn_images.distribution_domain_name
 }
 
-output "frontend_system_default_domain" {
-  description = "Default Amplify domain for the system frontend"
-  value       = module.frontend_system.default_domain
+output "frontend_system_bucket_name" {
+  description = "Name of the system frontend bucket"
+  value       = module.storage_frontend_system.bucket_name
+}
+
+output "frontend_system_distribution_id" {
+  description = "CloudFront distribution ID for the system frontend"
+  value       = module.cdn_frontend_system.distribution_id
+}
+
+output "frontend_system_domain_name" {
+  description = "CloudFront domain for the system frontend"
+  value       = module.cdn_frontend_system.distribution_domain_name
+}
+
+output "landing_page_bucket_name" {
+  description = "Name of the landing page bucket"
+  value       = module.storage_landing_page.bucket_name
+}
+
+output "landing_page_distribution_id" {
+  description = "CloudFront distribution ID for the landing page"
+  value       = module.cdn_landing_page.distribution_id
+}
+
+output "landing_page_domain_name" {
+  description = "CloudFront domain for the landing page"
+  value       = module.cdn_landing_page.distribution_domain_name
 }
