@@ -78,3 +78,26 @@ variable "backend_parameter_path" {
   type        = string
   default     = "backend/deploy"
 }
+
+variable "landing_github_repository" {
+  description = "GitHub repository that deploys the landing page"
+  type        = string
+}
+
+variable "landing_github_branches" {
+  description = "Git branches allowed to deploy the landing page"
+  type        = list(string)
+  default     = []
+}
+
+variable "landing_github_environments" {
+  description = "GitHub environments allowed to deploy the landing page"
+  type        = list(string)
+  default     = ["dev"]
+}
+
+variable "landing_parameter_path" {
+  description = "Landing page SSM parameter path under each environment prefix"
+  type        = string
+  default     = "landing-page"
+}
