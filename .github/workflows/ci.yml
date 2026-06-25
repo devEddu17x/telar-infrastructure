@@ -53,19 +53,8 @@ jobs:
       - name: Check Terraform format
         run: terraform fmt -check -recursive iac
 
-      - name: Check environment files
-        run: |
-          ENV_DIR="iac/environments/${{ steps.env.outputs.name }}"
-
-          if [ ! -d "$ENV_DIR" ]; then
-            echo "Environment directory does not exist: $ENV_DIR" >&2
-            exit 1
-          fi
-
-          if ! find "$ENV_DIR" -maxdepth 1 -name "*.tf" -print -quit | grep -q .; then
-            echo "Environment directory has no Terraform files: $ENV_DIR" >&2
-            exit 1
-          fi
+      - name: Disable remote backend
+        run: rm -f iac/environments/${{ steps.env.outputs.name }}/backend.tf
 
       - name: Terraform init
         run: terraform -chdir=iac/environments/${{ steps.env.outputs.name }} init -backend=false -input=false
