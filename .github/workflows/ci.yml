@@ -7,6 +7,7 @@ on:
       - qa
       - prod
     paths:
+      - ".github/workflows/ci.yml"
       - "iac/**"
 
 permissions:
