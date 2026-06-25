@@ -227,7 +227,7 @@ module "ecs" {
       { name = "AWS_COGNITO_CLIENT_ID", value = module.auth.frontend_client_id },
       { name = "STORAGE_BUCKET_NAME", value = module.storage_images.bucket_name },
       { name = "STORAGE_REGION", value = var.aws_region },
-      { name = "STORAGE_PUBLIC_URL", value = module.cdn_images.distribution_domain_name },
+      { name = "STORAGE_PUBLIC_URL", value = "https://${module.cdn_images.distribution_domain_name}" },
     ]
   )
 
