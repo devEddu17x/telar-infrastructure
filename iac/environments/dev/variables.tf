@@ -64,6 +64,12 @@ variable "s3_images_versioning_enabled" {
   type        = bool
 }
 
+variable "ecr_force_delete" {
+  description = "Allow repository deletion with images"
+  type        = bool
+  default     = true
+}
+
 variable "observability_retention_in_days" {
   description = "CloudWatch log retention in days"
   type        = number
