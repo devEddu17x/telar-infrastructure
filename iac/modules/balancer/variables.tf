@@ -18,7 +18,11 @@ variable "subnet_ids" {
   type        = list(string)
 }
 
-
+variable "deletion_protection" {
+  description = "Protect the ALB from deletion"
+  type        = bool
+  default     = true
+}
 
 variable "alb" {
   description = "ALB listener configuration (port exposed to API Gateway via VPC Link)"
