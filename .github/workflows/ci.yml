@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - qa
+      - prod
+    paths:
+      - ".github/workflows/ci.yml"
+      - "iac/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  terraform:
+    name: Terraform
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: "1.15.0"
+
+      - name: Select environment
+        id: env
+        run: |
+          case "${{ github.base_ref }}" in
+            develop)
+              echo "name=dev" >> "$GITHUB_OUTPUT"
+              ;;
+            qa)
+              echo "name=qa" >> "$GITHUB_OUTPUT"
+              ;;
+            prod)
+              echo "name=prod" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "Unsupported base branch: ${{ github.base_ref }}" >&2
+              exit 1
+              ;;
+          esac
+
+      - name: Check Terraform format
+        run: terraform fmt -check -recursive iac
+
+      - name: Check environment files
+        run: |
+          ENV_DIR="iac/environments/${{ steps.env.outputs.name }}"
+
+          if [ ! -d "$ENV_DIR" ]; then
+            echo "Environment directory does not exist: $ENV_DIR" >&2
+            exit 1
+          fi
+
+          if ! find "$ENV_DIR" -maxdepth 1 -name "*.tf" -print -quit | grep -q .; then
+            echo "Environment directory has no Terraform files: $ENV_DIR" >&2
+            exit 1
+          fi
+
+      - name: Terraform init
+        run: terraform -chdir=iac/environments/${{ steps.env.outputs.name }} init -backend=false -input=false
+
+      - name: Terraform validate
+        run: terraform -chdir=iac/environments/${{ steps.env.outputs.name }} validate
