@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - qa
+      - prod
+    paths:
+      - ".github/workflows/ci.yml"
+      - "iac/**"
+
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    name: Terraform
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e
+        with:
+          terraform_version: "1.15.0"
+
+      - name: Select environment
+        id: env
+        run: |
+          case "${{ github.base_ref }}" in
+            develop)
+              echo "name=dev" >> "$GITHUB_OUTPUT"
+              ;;
+            qa)
+              echo "name=qa" >> "$GITHUB_OUTPUT"
+              ;;
+            prod)
+              echo "name=prod" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "Unsupported base branch: ${{ github.base_ref }}" >&2
+              exit 1
+              ;;
+          esac
+
+      - name: Check Terraform format
+        run: terraform fmt -check -recursive iac
+
+      - name: Disable remote backend
+        run: rm -f iac/environments/${{ steps.env.outputs.name }}/backend.tf
+
+      - name: Terraform init
+        run: terraform -chdir=iac/environments/${{ steps.env.outputs.name }} init -backend=false -input=false
+
+      - name: Terraform validate
+        run: terraform -chdir=iac/environments/${{ steps.env.outputs.name }} validate
