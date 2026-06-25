@@ -66,3 +66,15 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "lifecycle_logs_enabled" {
+  description = "Enable lifecycle configuration for log buckets"
+  type        = bool
+  default     = false
+}
+
+variable "lifecycle_logs_expiration_days" {
+  description = "Number of days before log objects are automatically deleted"
+  type        = number
+  default     = 60
+}

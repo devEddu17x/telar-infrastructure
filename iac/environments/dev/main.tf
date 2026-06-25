@@ -114,6 +114,9 @@ module "storage_balancer_logs" {
   alb_access_logs_enabled = true
   alb_access_logs_prefix  = "logs"
   tags                    = local.default_tags
+
+  lifecycle_logs_enabled         = true
+  lifecycle_logs_expiration_days = 14
 }
 
 module "balancer" {
