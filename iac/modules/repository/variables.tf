@@ -20,6 +20,12 @@ variable "scan_on_push" {
   default     = true
 }
 
+variable "force_delete" {
+  description = "Allow repository deletion with images"
+  type        = bool
+  default     = false
+}
+
 variable "encryption_type" {
   description = "Encryption type for the repository (AES256 or KMS)"
   type        = string

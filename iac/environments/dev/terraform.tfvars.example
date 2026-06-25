@@ -24,7 +24,9 @@ s3_images_cors = {
   max_age_seconds = 3000
 }
 
-s3_images_versioning_enabled    = true or false
+s3_images_versioning_enabled = true or false
+
+ecr_force_delete = true
 
 observability_retention_in_days = 7
 
@@ -128,4 +130,3 @@ landing_page_static = {
   versioning_enabled = false
   price_class        = "PriceClass_100"
 }
-

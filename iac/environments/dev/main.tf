@@ -30,6 +30,7 @@ module "storage_images" {
 module "ecr_api" {
   source          = "../../modules/repository"
   repository_name = "${local.name_prefix}-api"
+  force_delete    = var.ecr_force_delete
   tags            = local.default_tags
 }
 
@@ -107,7 +108,7 @@ module "storage_balancer_logs" {
   source                  = "../../modules/storage"
   name_prefix             = local.name_prefix
   bucket_suffix           = "alb-logs"
-  force_destroy           = var.s3_images_force_destroy
+  force_destroy           = var.balancer_logs_force_destroy
   versioning_enabled      = false
   cors                    = { enabled = false, allowed_origins = [] }
   alb_access_logs_enabled = true
@@ -123,6 +124,7 @@ module "balancer" {
   security_group_ids    = [module.networking.alb_security_group_id]
   access_logs_bucket_id = module.storage_balancer_logs.bucket_id
   access_logs_prefix    = "logs"
+  deletion_protection   = var.balancer_deletion_protection
   deregistration_delay  = var.balancer_deregistration_delay
   health_check          = var.balancer_health_check
   alb                   = var.balancer_alb
