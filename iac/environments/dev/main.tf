@@ -70,10 +70,6 @@ module "database" {
   skip_final_snapshot          = var.db_skip_final_snapshot
 }
 
-data "aws_secretsmanager_secret_version" "rds_master" {
-  secret_id = module.database.master_secret_arn
-}
-
 module "ssm_parameters" {
   source      = "../../modules/security/ssm_parameters"
   name_prefix = local.name_prefix
@@ -97,21 +93,12 @@ module "shared_secrets" {
   tags                    = local.default_tags
 }
 
-module "db_password_secret" {
-  source                  = "../../modules/security/secrets_manager"
-  secret_name             = "${local.name_prefix}/backend/db-password"
-  description             = "Database password extracted from RDS managed secret"
-  secret_string           = jsondecode(data.aws_secretsmanager_secret_version.rds_master.secret_string).password
-  recovery_window_in_days = 0
-  tags                    = local.default_tags
-}
-
 module "iam" {
   source                                 = "../../modules/security/iam"
   name_prefix                            = local.name_prefix
   s3_bucket_arns                         = [module.storage_images.bucket_arn]
   cognito_user_pool_arn                  = module.auth.user_pool_arn
-  ecs_execution_secrets_manager_arns     = [module.db_password_secret.secret_arn, module.shared_secrets.secret_arn]
+  ecs_execution_secrets_manager_arns     = [module.shared_secrets.secret_arn]
   lambda_pre_signup_secrets_manager_arns = [module.shared_secrets.secret_arn]
   ssm_parameter_arns                     = module.ssm_parameters.parameter_arns
 }
@@ -246,8 +233,8 @@ module "ecs" {
 
   secrets = [
     {
-      name      = "DB_PASSWORD"
-      valueFrom = module.db_password_secret.secret_arn
+      name      = "DB_CREDENTIALS"
+      valueFrom = module.database.master_secret_arn
     },
     {
       name      = "AWS_COGNITO_INTERNAL_AUTH_TOKEN"
@@ -365,9 +352,9 @@ module "landing_page_parameters" {
 
   name_prefix = "${local.name_prefix}/landing-page"
   parameters = {
-    NEXT_PUBLIC_REDIRECT_URL  = "https://${module.cdn_frontend_system.distribution_domain_name}"
-    LANDING_BUCKET_NAME       = module.storage_landing_page.bucket_name
-    LANDING_DISTRIBUTION_ID   = module.cdn_landing_page.distribution_id
+    NEXT_PUBLIC_REDIRECT_URL = "https://${module.cdn_frontend_system.distribution_domain_name}"
+    LANDING_BUCKET_NAME      = module.storage_landing_page.bucket_name
+    LANDING_DISTRIBUTION_ID  = module.cdn_landing_page.distribution_id
   }
   tags = local.default_tags
 }
