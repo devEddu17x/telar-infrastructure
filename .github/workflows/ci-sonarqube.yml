@@ -7,7 +7,7 @@ on:
       - qa
       - prod
     paths:
-      - ".github/workflows/sonarqube.yml"
+      - ".github/workflows/ci-sonarqube.yml"
       - "sonar-project.properties"
       - "iac/**"
 
@@ -21,7 +21,7 @@ on:
       - synchronize
       - reopened
     paths:
-      - ".github/workflows/sonarqube.yml"
+      - ".github/workflows/ci-sonarqube.yml"
       - "sonar-project.properties"
       - "iac/**"
 
