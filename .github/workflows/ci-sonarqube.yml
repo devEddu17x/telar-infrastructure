@@ -47,7 +47,7 @@ jobs:
 
       - name: Analyze branch
         if: github.event_name != 'pull_request'
-        uses: SonarSource/sonarqube-scan-action@v8.2.0
+        uses: SonarSource/sonarqube-scan-action@713881670b6b3676cda39549040e2d88c70d582e
         with:
           args: >
             "-Dsonar.branch.name=${{ github.ref_name }}"
@@ -60,7 +60,7 @@ jobs:
 
       - name: Analyze pull request
         if: github.event_name == 'pull_request'
-        uses: SonarSource/sonarqube-scan-action@v8.2.0
+        uses: SonarSource/sonarqube-scan-action@713881670b6b3676cda39549040e2d88c70d582e
         with:
           args: >
             "-Dsonar.pullrequest.key=${{ github.event.pull_request.number }}"
