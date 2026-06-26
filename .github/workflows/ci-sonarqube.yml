@@ -1,0 +1,75 @@
+name: SonarQube
+
+on:
+  push:
+    branches:
+      - develop
+      - qa
+      - prod
+    paths:
+      - ".github/workflows/sonarqube.yml"
+      - "sonar-project.properties"
+      - "iac/**"
+
+  pull_request:
+    branches:
+      - develop
+      - qa
+      - prod
+    types:
+      - opened
+      - synchronize
+      - reopened
+    paths:
+      - ".github/workflows/sonarqube.yml"
+      - "sonar-project.properties"
+      - "iac/**"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sonarqube-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sonarqube:
+    name: SonarQube
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        with:
+          fetch-depth: 0
+
+      - name: Analyze branch
+        if: github.event_name != 'pull_request'
+        uses: SonarSource/sonarqube-scan-action@v8.2.0
+        with:
+          args: >
+            "-Dsonar.branch.name=${{ github.ref_name }}"
+            "-Dsonar.scm.revision=${{ github.sha }}"
+            "-Dsonar.qualitygate.wait=true"
+            "-Dsonar.qualitygate.timeout=600"
+        env:
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Analyze pull request
+        if: github.event_name == 'pull_request'
+        uses: SonarSource/sonarqube-scan-action@v8.2.0
+        with:
+          args: >
+            "-Dsonar.pullrequest.key=${{ github.event.pull_request.number }}"
+            "-Dsonar.pullrequest.branch=${{ github.head_ref }}"
+            "-Dsonar.pullrequest.base=${{ github.base_ref }}"
+            "-Dsonar.scm.revision=${{ github.event.pull_request.head.sha }}"
+            "-Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}"
+            "-Dsonar.qualitygate.wait=true"
+            "-Dsonar.qualitygate.timeout=600"
+        env:
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
