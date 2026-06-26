@@ -10,7 +10,8 @@ resource "aws_rds_cluster_instance" "writer" {
   availability_zone   = var.availability_zones[0]
   publicly_accessible = false
 
-  tags = merge(var.tags, { Role = "writer" })
+  tags                       = merge(var.tags, { Role = "writer" })
+  auto_minor_version_upgrade = true
 }
 
 resource "aws_rds_cluster_instance" "reader" {
@@ -25,5 +26,6 @@ resource "aws_rds_cluster_instance" "reader" {
   availability_zone   = var.availability_zones[1]
   publicly_accessible = false
 
-  tags = merge(var.tags, { Role = "reader" })
+  tags                       = merge(var.tags, { Role = "reader" })
+  auto_minor_version_upgrade = true
 }
