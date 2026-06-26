@@ -21,6 +21,7 @@ resource "aws_lambda_function" "this" {
   runtime                 = var.runtime
   role                    = var.role_arn
   code_signing_config_arn = aws_lambda_code_signing_config.this.arn
+  # checkov:skip=CKV_AWS_115: B2B tenant signup is extremely low traffic; no risk of exhausting account concurrency limits.
 
   environment {
     variables = var.environment_variables
