@@ -105,6 +105,9 @@ module "database" {
   skip_final_snapshot          = var.db_skip_final_snapshot
   monitoring_interval          = var.db_monitoring_interval
   monitoring_role_arn          = var.db_monitoring_interval > 0 ? module.iam.rds_monitoring_role_arn : null
+  backup_iam_role_arn          = module.iam.backup_role_arn
+  backup_schedule              = var.db_backup_schedule
+  backup_retention_days        = var.db_backup_vault_retention_days
 }
 
 module "storage_balancer_logs" {

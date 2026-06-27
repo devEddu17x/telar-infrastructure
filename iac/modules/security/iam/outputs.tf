@@ -37,3 +37,8 @@ output "rds_monitoring_role_arn" {
   description = "ARN of the IAM role used by RDS Enhanced Monitoring"
   value       = aws_iam_role.rds_monitoring.arn
 }
+
+output "backup_role_arn" {
+  description = "ARN of the IAM role used by AWS Backup to protect RDS clusters (satisfies CKV2_AWS_8)"
+  value       = aws_iam_role.backup.arn
+}

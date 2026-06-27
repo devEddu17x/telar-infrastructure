@@ -131,3 +131,6 @@ landing_page_static = {
   versioning_enabled = false
   price_class        = "PriceClass_100"
 }
+
+db_backup_schedule             = "cron(0 5 * * ? *)"
+db_backup_vault_retention_days = 7

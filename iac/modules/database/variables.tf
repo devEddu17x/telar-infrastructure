@@ -107,3 +107,25 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "backup_iam_role_arn" {
+  description = "ARN of the IAM role that AWS Backup will assume to perform backup and restore operations on the Aurora cluster"
+  type        = string
+}
+
+variable "backup_schedule" {
+  description = "Cron expression for the AWS Backup plan schedule (UTC). Default: daily at 05:00 UTC"
+  type        = string
+  default     = "cron(0 5 * * ? *)"
+}
+
+variable "backup_retention_days" {
+  description = "Number of days to retain AWS Backup recovery points in the vault"
+  type        = number
+  default     = 7
+
+  validation {
+    condition     = var.backup_retention_days >= 1
+    error_message = "backup_retention_days must be at least 1"
+  }
+}

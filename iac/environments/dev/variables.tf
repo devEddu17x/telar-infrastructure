@@ -336,3 +336,15 @@ variable "images_static" {
   })
   default = {}
 }
+
+variable "db_backup_schedule" {
+  description = "Cron expression for the AWS Backup plan (UTC). Overrides the module default."
+  type        = string
+  default     = "cron(0 5 * * ? *)"
+}
+
+variable "db_backup_vault_retention_days" {
+  description = "Days to keep AWS Backup recovery points in the vault"
+  type        = number
+  default     = 7
+}
