@@ -10,6 +10,8 @@ resource "aws_rds_cluster_instance" "writer" {
   availability_zone   = var.availability_zones[0]
   publicly_accessible = false
 
+  performance_insights_enabled = true
+
   monitoring_interval = var.monitoring_interval
   monitoring_role_arn = var.monitoring_interval > 0 ? var.monitoring_role_arn : null
 
@@ -35,6 +37,8 @@ resource "aws_rds_cluster_instance" "reader" {
 
   availability_zone   = var.availability_zones[1]
   publicly_accessible = false
+
+  performance_insights_enabled = true
 
   monitoring_interval = var.monitoring_interval
   monitoring_role_arn = var.monitoring_interval > 0 ? var.monitoring_role_arn : null
