@@ -73,7 +73,7 @@ variable "ecr_force_delete" {
 variable "observability_retention_in_days" {
   description = "CloudWatch log retention in days"
   type        = number
-  default     = 7
+  default     = 365
 }
 
 variable "firewall_rate_limits" {

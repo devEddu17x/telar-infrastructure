@@ -28,7 +28,7 @@ s3_images_versioning_enabled = true or false
 
 ecr_force_delete = true
 
-observability_retention_in_days = 7
+observability_retention_in_days = 365
 
 firewall_rate_limits = [{
   name           = "rate_limit_name"
