@@ -7,7 +7,7 @@ resource "aws_api_gateway_rest_api" "main" {
 
   tags = var.tags
 
-   lifecycle {
+  lifecycle {
     create_before_destroy = true
   }
 }
