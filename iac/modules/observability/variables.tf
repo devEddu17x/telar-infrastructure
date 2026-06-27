@@ -6,7 +6,7 @@ variable "name_prefix" {
 variable "retention_in_days" {
   description = "CloudWatch log retention in days"
   type        = number
-  default     = 7
+  default     = 365
 }
 
 variable "tags" {
