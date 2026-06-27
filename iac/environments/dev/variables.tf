@@ -163,6 +163,17 @@ variable "db_skip_final_snapshot" {
   default     = true
 }
 
+variable "db_monitoring_interval" {
+  description = "Enhanced monitoring interval in seconds"
+  type        = number
+  default     = 60
+
+  validation {
+    condition     = contains([0, 1, 5, 10, 15, 30, 60], var.db_monitoring_interval)
+    error_message = "db_monitoring_interval must be 0, 1, 5, 10, 15, 30, or 60"
+  }
+}
+
 variable "cognito_internal_auth_token" {
   description = "Internal auth token used by the backend for Cognito admin operations"
   type = object({

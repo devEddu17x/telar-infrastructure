@@ -85,6 +85,23 @@ variable "skip_final_snapshot" {
   default     = false
 }
 
+variable "monitoring_interval" {
+  description = "Enhanced monitoring interval in seconds"
+  type        = number
+  default     = 60
+
+  validation {
+    condition     = contains([0, 1, 5, 10, 15, 30, 60], var.monitoring_interval)
+    error_message = "monitoring_interval must be 0, 1, 5, 10, 15, 30, or 60"
+  }
+}
+
+variable "monitoring_role_arn" {
+  description = "IAM role ARN for enhanced monitoring"
+  type        = string
+  default     = null
+}
+
 variable "tags" {
   description = "Tags to apply to all database resources"
   type        = map(string)
