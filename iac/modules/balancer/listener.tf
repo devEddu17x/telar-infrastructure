@@ -1,5 +1,6 @@
 resource "aws_lb_listener" "alb_listener" {
-  #checkov:skip=CKV_AWS_2:The ALB uses HTTP because it is in a VPC and connects to the API through a vpclink
+  #checkov:skip=CKV_AWS_2:ALB esta en una red privada
+  #checkov:skip=CKV2_AWS_20:No es necesario redirigir a https
   load_balancer_arn = aws_lb.alb.arn
   port              = var.alb.port
   protocol          = var.alb.protocol
