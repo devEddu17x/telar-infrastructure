@@ -26,6 +26,8 @@ resource "aws_rds_cluster" "this" {
   final_snapshot_identifier       = var.skip_final_snapshot ? null : "${var.name_prefix}-aurora-final-snapshot"
   enabled_cloudwatch_logs_exports = ["postgresql"]
 
+  copy_tags_to_snapshot = true
+
   tags = var.tags
 
   lifecycle {
