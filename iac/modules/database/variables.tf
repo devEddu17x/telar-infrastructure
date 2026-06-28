@@ -85,8 +85,47 @@ variable "skip_final_snapshot" {
   default     = false
 }
 
+variable "monitoring_interval" {
+  description = "Enhanced monitoring interval in seconds"
+  type        = number
+  default     = 60
+
+  validation {
+    condition     = contains([0, 1, 5, 10, 15, 30, 60], var.monitoring_interval)
+    error_message = "monitoring_interval must be 0, 1, 5, 10, 15, 30, or 60"
+  }
+}
+
+variable "monitoring_role_arn" {
+  description = "IAM role ARN for enhanced monitoring"
+  type        = string
+  default     = null
+}
+
 variable "tags" {
   description = "Tags to apply to all database resources"
   type        = map(string)
   default     = {}
+}
+
+variable "backup_iam_role_arn" {
+  description = "ARN of the IAM role that AWS Backup will assume to perform backup and restore operations on the Aurora cluster"
+  type        = string
+}
+
+variable "backup_schedule" {
+  description = "Cron expression for the AWS Backup plan schedule (UTC). Default: daily at 05:00 UTC"
+  type        = string
+  default     = "cron(0 5 * * ? *)"
+}
+
+variable "backup_retention_days" {
+  description = "Number of days to retain AWS Backup recovery points in the vault"
+  type        = number
+  default     = 7
+
+  validation {
+    condition     = var.backup_retention_days >= 1
+    error_message = "backup_retention_days must be at least 1"
+  }
 }

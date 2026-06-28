@@ -17,6 +17,8 @@ resource "aws_api_gateway_resource" "health" {
 }
 
 resource "aws_api_gateway_method" "health" {
+  #checkov:skip=CKV_AWS_59:Health endpoint must stay public for API availability checks.
+
   rest_api_id   = aws_api_gateway_rest_api.main.id
   resource_id   = aws_api_gateway_resource.health.id
   http_method   = "ANY"
@@ -42,6 +44,8 @@ resource "aws_api_gateway_resource" "docs" {
 }
 
 resource "aws_api_gateway_method" "docs" {
+  #checkov:skip=CKV_AWS_59:Swagger documentation must stay public for frontend development.
+
   rest_api_id   = aws_api_gateway_rest_api.main.id
   resource_id   = aws_api_gateway_resource.docs.id
   http_method   = "ANY"
@@ -67,6 +71,8 @@ resource "aws_api_gateway_resource" "docs_proxy" {
 }
 
 resource "aws_api_gateway_method" "docs_proxy" {
+  #checkov:skip=CKV_AWS_59:Swagger assets must stay public to load documentation resources.
+
   rest_api_id   = aws_api_gateway_rest_api.main.id
   resource_id   = aws_api_gateway_resource.docs_proxy.id
   http_method   = "ANY"
@@ -100,6 +106,8 @@ resource "aws_api_gateway_resource" "docs_json" {
 }
 
 resource "aws_api_gateway_method" "docs_json" {
+  #checkov:skip=CKV_AWS_59:Swagger JSON must stay public for frontend endpoint discovery.
+
   rest_api_id   = aws_api_gateway_rest_api.main.id
   resource_id   = aws_api_gateway_resource.docs_json.id
   http_method   = "ANY"

@@ -1,4 +1,5 @@
 resource "aws_lb" "alb" {
+  #checkov:skip=CKV2_AWS_20:no es necesario redirigir a https
   name               = "${var.name_prefix}-alb"
   internal           = true
   load_balancer_type = "application"

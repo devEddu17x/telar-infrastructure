@@ -42,3 +42,13 @@ output "master_secret_arn" {
   description = "ARN of the master user secret managed by RDS"
   value       = aws_rds_cluster.this.master_user_secret[0].secret_arn
 }
+
+output "backup_plan_id" {
+  description = "ID of the AWS Backup plan protecting the Aurora cluster"
+  value       = aws_backup_plan.this.id
+}
+
+output "backup_vault_name" {
+  description = "Name of the AWS Backup vault where recovery points are stored"
+  value       = aws_backup_vault.this.name
+}

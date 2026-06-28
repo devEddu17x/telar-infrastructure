@@ -17,13 +17,12 @@ module "auth" {
 }
 
 module "storage_images" {
-  source             = "../../modules/storage"
-  name_prefix        = local.name_prefix
-  bucket_suffix      = "images"
-  force_destroy      = var.s3_images_force_destroy
-  cors               = var.s3_images_cors
-  versioning_enabled = var.s3_images_versioning_enabled
-  tags               = local.default_tags
+  source        = "../../modules/storage"
+  name_prefix   = local.name_prefix
+  bucket_suffix = "images"
+  force_destroy = var.s3_images_force_destroy
+  cors          = var.s3_images_cors
+  tags          = local.default_tags
 }
 
 module "firewall_api" {
@@ -54,4 +53,9 @@ module "database" {
   preferred_maintenance_window = var.db_maintenance_window
   deletion_protection          = var.db_deletion_protection
   skip_final_snapshot          = var.db_skip_final_snapshot
+  monitoring_interval          = var.db_monitoring_interval
+  monitoring_role_arn          = var.db_monitoring_interval > 0 ? module.iam.rds_monitoring_role_arn : null
+  backup_iam_role_arn          = module.iam.backup_role_arn
+  backup_schedule              = var.db_backup_schedule
+  backup_retention_days        = var.db_backup_vault_retention_days
 }

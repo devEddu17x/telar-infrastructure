@@ -24,11 +24,8 @@ s3_images_cors = {
   max_age_seconds = 3000
 }
 
-s3_images_versioning_enabled = true or false
 
 ecr_force_delete = true
-
-observability_retention_in_days = 7
 
 firewall_rate_limits = [{
   name           = "rate_limit_name"
@@ -50,8 +47,9 @@ db_max_capacity            = 16
 db_backup_retention_period = 7
 db_backup_window           = "08:00-09:00"
 db_maintenance_window      = "sun:09:00-sun:10:00"
-db_deletion_protection     = false
+db_deletion_protection     = true
 db_skip_final_snapshot     = true
+db_monitoring_interval     = 60
 
 cognito_internal_auth_token = "your-internal-auth-token"
 
@@ -69,7 +67,7 @@ balancer_alb = {
 }
 balancer_target_group = {
   port        = 3000
-  protocol    = "HTTPS"
+  protocol    = "HTTP"
   target_type = "ip"
 }
 
@@ -113,20 +111,20 @@ ecs_auto_scaling = {
 images_static = {
   enabled            = true
   force_destroy      = false
-  versioning_enabled = false
   price_class        = "PriceClass_100"
 }
 
 frontend_system_static = {
   enabled            = true
   force_destroy      = false
-  versioning_enabled = false
   price_class        = "PriceClass_100"
 }
 
 landing_page_static = {
   enabled            = true
   force_destroy      = false
-  versioning_enabled = false
   price_class        = "PriceClass_100"
 }
+
+db_backup_schedule             = "cron(0 5 * * ? *)"
+db_backup_vault_retention_days = 7

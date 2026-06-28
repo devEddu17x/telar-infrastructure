@@ -22,7 +22,6 @@ module "storage_images" {
   bucket_suffix        = "images"
   force_destroy        = var.s3_images_force_destroy
   cors                 = var.s3_images_cors
-  versioning_enabled   = var.s3_images_versioning_enabled
   manage_bucket_policy = false
   tags                 = local.default_tags
 }
@@ -47,29 +46,11 @@ module "firewall_api" {
 }
 
 module "observability" {
-  source            = "../../modules/observability"
-  name_prefix       = local.name_prefix
-  retention_in_days = var.observability_retention_in_days
-  tags              = local.default_tags
+  source      = "../../modules/observability"
+  name_prefix = local.name_prefix
+  tags        = local.default_tags
 }
 
-module "database" {
-  source                       = "../../modules/database"
-  name_prefix                  = local.name_prefix
-  availability_zones           = var.availability_zones
-  subnet_ids                   = module.networking.private_persistence_subnet_ids
-  security_group_ids           = module.networking.aurora_security_group_id
-  engine_version               = var.db_engine_version
-  database_name                = var.db_name
-  master_username              = var.db_master_username
-  serverless_min_capacity      = var.db_min_capacity
-  serverless_max_capacity      = var.db_max_capacity
-  backup_retention_period      = var.db_backup_retention_period
-  preferred_backup_window      = var.db_backup_window
-  preferred_maintenance_window = var.db_maintenance_window
-  deletion_protection          = var.db_deletion_protection
-  skip_final_snapshot          = var.db_skip_final_snapshot
-}
 
 module "ssm_parameters" {
   source      = "../../modules/security/ssm_parameters"
@@ -104,16 +85,41 @@ module "iam" {
   ssm_parameter_arns                     = module.ssm_parameters.parameter_arns
 }
 
+module "database" {
+  source                       = "../../modules/database"
+  name_prefix                  = local.name_prefix
+  availability_zones           = var.availability_zones
+  subnet_ids                   = module.networking.private_persistence_subnet_ids
+  security_group_ids           = module.networking.aurora_security_group_id
+  engine_version               = var.db_engine_version
+  database_name                = var.db_name
+  master_username              = var.db_master_username
+  serverless_min_capacity      = var.db_min_capacity
+  serverless_max_capacity      = var.db_max_capacity
+  backup_retention_period      = var.db_backup_retention_period
+  preferred_backup_window      = var.db_backup_window
+  preferred_maintenance_window = var.db_maintenance_window
+  deletion_protection          = var.db_deletion_protection
+  skip_final_snapshot          = var.db_skip_final_snapshot
+  monitoring_interval          = var.db_monitoring_interval
+  monitoring_role_arn          = var.db_monitoring_interval > 0 ? module.iam.rds_monitoring_role_arn : null
+  backup_iam_role_arn          = module.iam.backup_role_arn
+  backup_schedule              = var.db_backup_schedule
+  backup_retention_days        = var.db_backup_vault_retention_days
+}
+
 module "storage_balancer_logs" {
   source                  = "../../modules/storage"
   name_prefix             = local.name_prefix
   bucket_suffix           = "alb-logs"
   force_destroy           = var.balancer_logs_force_destroy
-  versioning_enabled      = false
   cors                    = { enabled = false, allowed_origins = [] }
   alb_access_logs_enabled = true
   alb_access_logs_prefix  = "logs"
   tags                    = local.default_tags
+
+  lifecycle_logs_enabled         = true
+  lifecycle_logs_expiration_days = 14
 }
 
 module "balancer" {
@@ -278,7 +284,6 @@ module "storage_frontend_system" {
   name_prefix          = local.name_prefix
   bucket_suffix        = "system-frontend"
   force_destroy        = var.frontend_system_static.force_destroy
-  versioning_enabled   = var.frontend_system_static.versioning_enabled
   cors                 = { enabled = false, allowed_origins = [] }
   manage_bucket_policy = false
   tags                 = local.default_tags
@@ -324,7 +329,6 @@ module "storage_landing_page" {
   name_prefix          = local.name_prefix
   bucket_suffix        = "landing-page"
   force_destroy        = var.landing_page_static.force_destroy
-  versioning_enabled   = var.landing_page_static.versioning_enabled
   cors                 = { enabled = false, allowed_origins = [] }
   manage_bucket_policy = false
   tags                 = local.default_tags

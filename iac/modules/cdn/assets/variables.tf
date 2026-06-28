@@ -55,3 +55,12 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "geo_restriction" {
+  description = "Geographic restriction for the distribution"
+  type = object({
+    restriction_type = optional(string, "blacklist")
+    locations        = optional(list(string), ["AQ"])
+  })
+  default = {}
+}

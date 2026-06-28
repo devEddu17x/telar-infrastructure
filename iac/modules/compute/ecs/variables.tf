@@ -111,7 +111,7 @@ variable "container_health_check" {
 variable "enable_container_insights" {
   description = "Enable CloudWatch Container Insights"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "tags" {

@@ -14,11 +14,6 @@ variable "force_destroy" {
   default     = false
 }
 
-variable "versioning_enabled" {
-  description = "Enable object versioning"
-  type        = bool
-  default     = false
-}
 
 variable "cors" {
   description = "CORS configuration for the bucket"
@@ -65,4 +60,16 @@ variable "tags" {
   description = "Common tags applied to all storage resources"
   type        = map(string)
   default     = {}
+}
+
+variable "lifecycle_logs_enabled" {
+  description = "Enable lifecycle configuration for log buckets"
+  type        = bool
+  default     = false
+}
+
+variable "lifecycle_logs_expiration_days" {
+  description = "Number of days before log objects are automatically deleted"
+  type        = number
+  default     = 60
 }

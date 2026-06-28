@@ -59,10 +59,6 @@ variable "s3_images_cors" {
   })
 }
 
-variable "s3_images_versioning_enabled" {
-  description = "Enable object versioning for the images bucket"
-  type        = bool
-}
 
 variable "ecr_force_delete" {
   description = "Allow repository deletion with images"
@@ -70,11 +66,6 @@ variable "ecr_force_delete" {
   default     = true
 }
 
-variable "observability_retention_in_days" {
-  description = "CloudWatch log retention in days"
-  type        = number
-  default     = 7
-}
 
 variable "firewall_rate_limits" {
   description = "Each entry creates one rule and one regex pattern set."
@@ -154,13 +145,36 @@ variable "db_maintenance_window" {
 variable "db_deletion_protection" {
   description = "Protect the cluster from accidental deletion"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "db_skip_final_snapshot" {
   description = "Skip final snapshot on cluster deletion"
   type        = bool
   default     = true
+}
+
+variable "db_monitoring_interval" {
+  description = "Enhanced monitoring interval in seconds"
+  type        = number
+  default     = 60
+
+  validation {
+    condition     = contains([0, 1, 5, 10, 15, 30, 60], var.db_monitoring_interval)
+    error_message = "db_monitoring_interval must be 0, 1, 5, 10, 15, 30, or 60"
+  }
+}
+
+variable "db_backup_schedule" {
+  description = "Cron expression for the AWS Backup plan schedule"
+  type        = string
+  default     = "cron(0 5 * * ? *)"
+}
+
+variable "db_backup_vault_retention_days" {
+  description = "Days to retain AWS Backup recovery points"
+  type        = number
+  default     = 7
 }
 
 variable "cognito_internal_auth_token" {
@@ -297,10 +311,9 @@ variable "ecs_auto_scaling" {
 variable "frontend_system_static" {
   description = "Static hosting settings for the system frontend"
   type = object({
-    enabled            = optional(bool, true)
-    force_destroy      = optional(bool, false)
-    versioning_enabled = optional(bool, false)
-    price_class        = optional(string, "PriceClass_100")
+    enabled       = optional(bool, true)
+    force_destroy = optional(bool, false)
+    price_class   = optional(string, "PriceClass_100")
   })
   default = {}
 }
@@ -308,20 +321,18 @@ variable "frontend_system_static" {
 variable "landing_page_static" {
   description = "Static hosting settings for the landing page"
   type = object({
-    enabled            = optional(bool, true)
-    force_destroy      = optional(bool, false)
-    versioning_enabled = optional(bool, false)
-    price_class        = optional(string, "PriceClass_100")
+    enabled       = optional(bool, true)
+    force_destroy = optional(bool, false)
+    price_class   = optional(string, "PriceClass_100")
   })
   default = {}
 }
 variable "images_static" {
   description = "Static hosting settings for the images"
   type = object({
-    enabled            = optional(bool, true)
-    force_destroy      = optional(bool, false)
-    versioning_enabled = optional(bool, false)
-    price_class        = optional(string, "PriceClass_100")
+    enabled       = optional(bool, true)
+    force_destroy = optional(bool, false)
+    price_class   = optional(string, "PriceClass_100")
   })
   default = {}
 }
