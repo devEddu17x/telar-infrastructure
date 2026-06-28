@@ -66,11 +66,6 @@ variable "ecr_force_delete" {
   default     = true
 }
 
-variable "observability_retention_in_days" {
-  description = "CloudWatch log retention in days"
-  type        = number
-  default     = 365
-}
 
 variable "firewall_rate_limits" {
   description = "Each entry creates one rule and one regex pattern set."
@@ -316,9 +311,9 @@ variable "ecs_auto_scaling" {
 variable "frontend_system_static" {
   description = "Static hosting settings for the system frontend"
   type = object({
-    enabled            = optional(bool, true)
-    force_destroy      = optional(bool, false)
-    price_class        = optional(string, "PriceClass_100")
+    enabled       = optional(bool, true)
+    force_destroy = optional(bool, false)
+    price_class   = optional(string, "PriceClass_100")
   })
   default = {}
 }
@@ -326,18 +321,18 @@ variable "frontend_system_static" {
 variable "landing_page_static" {
   description = "Static hosting settings for the landing page"
   type = object({
-    enabled            = optional(bool, true)
-    force_destroy      = optional(bool, false)
-    price_class        = optional(string, "PriceClass_100")
+    enabled       = optional(bool, true)
+    force_destroy = optional(bool, false)
+    price_class   = optional(string, "PriceClass_100")
   })
   default = {}
 }
 variable "images_static" {
   description = "Static hosting settings for the images"
   type = object({
-    enabled            = optional(bool, true)
-    force_destroy      = optional(bool, false)
-    price_class        = optional(string, "PriceClass_100")
+    enabled       = optional(bool, true)
+    force_destroy = optional(bool, false)
+    price_class   = optional(string, "PriceClass_100")
   })
   default = {}
 }

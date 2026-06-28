@@ -46,10 +46,9 @@ module "firewall_api" {
 }
 
 module "observability" {
-  source            = "../../modules/observability"
-  name_prefix       = local.name_prefix
-  retention_in_days = var.observability_retention_in_days
-  tags              = local.default_tags
+  source      = "../../modules/observability"
+  name_prefix = local.name_prefix
+  tags        = local.default_tags
 }
 
 

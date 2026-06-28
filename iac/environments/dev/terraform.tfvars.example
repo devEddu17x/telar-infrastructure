@@ -27,8 +27,6 @@ s3_images_cors = {
 
 ecr_force_delete = true
 
-observability_retention_in_days = 365
-
 firewall_rate_limits = [{
   name           = "rate_limit_name"
   limit          = 50
@@ -69,7 +67,7 @@ balancer_alb = {
 }
 balancer_target_group = {
   port        = 3000
-  protocol    = "HTTPS"
+  protocol    = "HTTP"
   target_type = "ip"
 }
 
