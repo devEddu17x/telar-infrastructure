@@ -59,10 +59,6 @@ variable "s3_images_cors" {
   })
 }
 
-variable "s3_images_versioning_enabled" {
-  description = "Enable object versioning for the images bucket"
-  type        = bool
-}
 
 variable "ecr_force_delete" {
   description = "Allow repository deletion with images"
@@ -172,6 +168,18 @@ variable "db_monitoring_interval" {
     condition     = contains([0, 1, 5, 10, 15, 30, 60], var.db_monitoring_interval)
     error_message = "db_monitoring_interval must be 0, 1, 5, 10, 15, 30, or 60"
   }
+}
+
+variable "db_backup_schedule" {
+  description = "Cron expression for the AWS Backup plan schedule"
+  type        = string
+  default     = "cron(0 5 * * ? *)"
+}
+
+variable "db_backup_vault_retention_days" {
+  description = "Days to retain AWS Backup recovery points"
+  type        = number
+  default     = 7
 }
 
 variable "cognito_internal_auth_token" {
@@ -310,7 +318,6 @@ variable "frontend_system_static" {
   type = object({
     enabled            = optional(bool, true)
     force_destroy      = optional(bool, false)
-    versioning_enabled = optional(bool, false)
     price_class        = optional(string, "PriceClass_100")
   })
   default = {}
@@ -321,7 +328,6 @@ variable "landing_page_static" {
   type = object({
     enabled            = optional(bool, true)
     force_destroy      = optional(bool, false)
-    versioning_enabled = optional(bool, false)
     price_class        = optional(string, "PriceClass_100")
   })
   default = {}
@@ -331,7 +337,6 @@ variable "images_static" {
   type = object({
     enabled            = optional(bool, true)
     force_destroy      = optional(bool, false)
-    versioning_enabled = optional(bool, false)
     price_class        = optional(string, "PriceClass_100")
   })
   default = {}

@@ -14,11 +14,6 @@ variable "force_destroy" {
   default     = false
 }
 
-variable "versioning_enabled" {
-  description = "Enable object versioning"
-  type        = bool
-  default     = false
-}
 
 variable "cors" {
   description = "CORS configuration for the bucket"

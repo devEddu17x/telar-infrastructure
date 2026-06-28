@@ -22,7 +22,6 @@ module "storage_images" {
   bucket_suffix        = "images"
   force_destroy        = var.s3_images_force_destroy
   cors                 = var.s3_images_cors
-  versioning_enabled   = var.s3_images_versioning_enabled
   manage_bucket_policy = false
   tags                 = local.default_tags
 }
@@ -115,7 +114,6 @@ module "storage_balancer_logs" {
   name_prefix             = local.name_prefix
   bucket_suffix           = "alb-logs"
   force_destroy           = var.balancer_logs_force_destroy
-  versioning_enabled      = false
   cors                    = { enabled = false, allowed_origins = [] }
   alb_access_logs_enabled = true
   alb_access_logs_prefix  = "logs"
@@ -287,7 +285,6 @@ module "storage_frontend_system" {
   name_prefix          = local.name_prefix
   bucket_suffix        = "system-frontend"
   force_destroy        = var.frontend_system_static.force_destroy
-  versioning_enabled   = var.frontend_system_static.versioning_enabled
   cors                 = { enabled = false, allowed_origins = [] }
   manage_bucket_policy = false
   tags                 = local.default_tags
@@ -333,7 +330,6 @@ module "storage_landing_page" {
   name_prefix          = local.name_prefix
   bucket_suffix        = "landing-page"
   force_destroy        = var.landing_page_static.force_destroy
-  versioning_enabled   = var.landing_page_static.versioning_enabled
   cors                 = { enabled = false, allowed_origins = [] }
   manage_bucket_policy = false
   tags                 = local.default_tags

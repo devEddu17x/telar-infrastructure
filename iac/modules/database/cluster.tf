@@ -21,6 +21,7 @@ resource "aws_rds_cluster" "this" {
   preferred_backup_window      = var.preferred_backup_window
   preferred_maintenance_window = var.preferred_maintenance_window
 
+  //checkov:skip=CKV_AWS_139:Value controlled via variable; true in prod, configurable in dev for destroy capability
   deletion_protection             = var.deletion_protection
   skip_final_snapshot             = var.skip_final_snapshot
   final_snapshot_identifier       = var.skip_final_snapshot ? null : "${var.name_prefix}-aurora-final-snapshot"

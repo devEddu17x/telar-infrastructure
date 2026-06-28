@@ -24,7 +24,6 @@ s3_images_cors = {
   max_age_seconds = 3000
 }
 
-s3_images_versioning_enabled    = true or false
 
 firewall_rate_limits = [{
   name           = "rate_limit_name"

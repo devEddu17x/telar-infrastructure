@@ -24,7 +24,6 @@ s3_images_cors = {
   max_age_seconds = 3000
 }
 
-s3_images_versioning_enabled = true or false
 
 ecr_force_delete = true
 
@@ -114,21 +113,18 @@ ecs_auto_scaling = {
 images_static = {
   enabled            = true
   force_destroy      = false
-  versioning_enabled = false
   price_class        = "PriceClass_100"
 }
 
 frontend_system_static = {
   enabled            = true
   force_destroy      = false
-  versioning_enabled = false
   price_class        = "PriceClass_100"
 }
 
 landing_page_static = {
   enabled            = true
   force_destroy      = false
-  versioning_enabled = false
   price_class        = "PriceClass_100"
 }
 
