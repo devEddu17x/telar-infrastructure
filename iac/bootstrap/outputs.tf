@@ -1,4 +1,4 @@
-output "backend_config_" {
+output "backend_config" {
   description = "Example backend values to place in environment backend.hcl files"
   value = {
     bucket  = aws_s3_bucket.terraform_state.id
