@@ -17,8 +17,3 @@ variable "environment" {
   description = "Environment identifier: dev, qa, prod"
   type        = string
 }
-
-variable "state_lock_table_name" {
-  description = "DynamoDB table name used for Terraform state locking"
-  type        = string
-}
