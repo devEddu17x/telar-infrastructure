@@ -129,3 +129,9 @@ variable "backup_retention_days" {
     error_message = "backup_retention_days must be at least 1"
   }
 }
+
+variable "backup_vault_force_destroy" {
+  description = "Delete recovery points when destroying the backup vault"
+  type        = bool
+  default     = false
+}
