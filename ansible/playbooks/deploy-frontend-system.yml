@@ -1,0 +1,172 @@
+- name: Deploy system frontend
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars_files:
+    - ../group_vars/all.yml
+
+  vars:
+    frontend_system_dir: "{{ workspace_root }}/frontend-system"
+    frontend_system_ssm_names:
+      - "/{{ name_prefix }}/frontend/NEXT_PUBLIC_API_URL"
+      - "/{{ name_prefix }}/frontend/NEXT_PUBLIC_AWS_COGNITO_REGION"
+      - "/{{ name_prefix }}/frontend/NEXT_PUBLIC_AWS_COGNITO_CLIENT_ID"
+      - "/{{ name_prefix }}/frontend/ASSETS_HOSTNAME"
+      - "/{{ name_prefix }}/frontend/FRONTEND_BUCKET_NAME"
+      - "/{{ name_prefix }}/frontend/FRONTEND_DISTRIBUTION_ID"
+    frontend_system_required_parameters:
+      - NEXT_PUBLIC_API_URL
+      - NEXT_PUBLIC_AWS_COGNITO_REGION
+      - NEXT_PUBLIC_AWS_COGNITO_CLIENT_ID
+      - ASSETS_HOSTNAME
+      - FRONTEND_BUCKET_NAME
+      - FRONTEND_DISTRIBUTION_ID
+
+  tasks:
+    - name: Deploy system frontend application
+      block:
+        - name: Validate required commands
+          ansible.builtin.command:
+            argv:
+              - "{{ item }}"
+              - "--version"
+          loop:
+            - aws
+            - git
+            - node
+            - corepack
+          changed_when: false
+
+        - name: Ensure deployment workspace exists
+          ansible.builtin.file:
+            path: "{{ workspace_root }}"
+            state: directory
+            mode: "0755"
+
+        - name: Read frontend deployment parameters
+          ansible.builtin.command:
+            argv: "{{ ['aws', 'ssm', 'get-parameters', '--with-decryption', '--region', aws_region, '--output', 'json', '--names'] + frontend_system_ssm_names }}"
+          environment: "{{ aws_environment }}"
+          register: frontend_system_ssm_raw
+          changed_when: false
+
+        - name: Build frontend parameter map
+          ansible.builtin.set_fact:
+            frontend_system_parameters: "{{ frontend_system_parameters | default({}) | combine({ item.Name.split('/')[-1]: item.Value }) }}"
+          loop: "{{ (frontend_system_ssm_raw.stdout | from_json).Parameters }}"
+
+        - name: Validate frontend parameters
+          ansible.builtin.assert:
+            that:
+              - frontend_system_parameters[item] is defined
+              - frontend_system_parameters[item] | length > 0
+            fail_msg: "Missing SSM parameter /{{ name_prefix }}/frontend/{{ item }}"
+          loop: "{{ frontend_system_required_parameters }}"
+
+        - name: Prepare frontend workspace
+          ansible.builtin.file:
+            path: "{{ frontend_system_dir }}"
+            state: absent
+
+        - name: Clone frontend repository
+          ansible.builtin.git:
+            repo: "{{ frontend_system_repo_url }}"
+            dest: "{{ frontend_system_dir }}"
+            version: "{{ frontend_system_branch }}"
+            depth: 1
+
+        - name: Enable Corepack
+          ansible.builtin.command:
+            argv:
+              - corepack
+              - enable
+          changed_when: false
+
+        - name: Install frontend dependencies
+          ansible.builtin.command:
+            argv:
+              - pnpm
+              - install
+              - --frozen-lockfile
+            chdir: "{{ frontend_system_dir }}"
+
+        - name: Build frontend static export
+          ansible.builtin.command:
+            argv:
+              - pnpm
+              - run
+              - build
+            chdir: "{{ frontend_system_dir }}"
+          environment:
+            AWS_PROFILE: "{{ aws_profile }}"
+            AWS_REGION: "{{ aws_region }}"
+            AWS_DEFAULT_REGION: "{{ aws_region }}"
+            NEXT_PUBLIC_API_URL: "{{ frontend_system_parameters.NEXT_PUBLIC_API_URL }}"
+            NEXT_PUBLIC_AWS_COGNITO_REGION: "{{ frontend_system_parameters.NEXT_PUBLIC_AWS_COGNITO_REGION }}"
+            NEXT_PUBLIC_AWS_COGNITO_CLIENT_ID: "{{ frontend_system_parameters.NEXT_PUBLIC_AWS_COGNITO_CLIENT_ID }}"
+            ASSETS_HOSTNAME: "{{ frontend_system_parameters.ASSETS_HOSTNAME }}"
+
+        - name: Validate frontend static export
+          ansible.builtin.stat:
+            path: "{{ frontend_system_dir }}/out"
+          register: frontend_system_out
+
+        - name: Assert frontend static export exists
+          ansible.builtin.assert:
+            that:
+              - frontend_system_out.stat.isdir is defined
+              - frontend_system_out.stat.isdir
+            fail_msg: "Frontend build did not create {{ frontend_system_dir }}/out"
+
+        - name: Upload frontend static export
+          ansible.builtin.command:
+            argv:
+              - aws
+              - s3
+              - sync
+              - "{{ frontend_system_dir }}/out/"
+              - "s3://{{ frontend_system_parameters.FRONTEND_BUCKET_NAME }}"
+              - --delete
+          environment: "{{ aws_environment }}"
+
+        - name: Invalidate frontend CloudFront distribution
+          ansible.builtin.command:
+            argv:
+              - aws
+              - cloudfront
+              - create-invalidation
+              - --distribution-id
+              - "{{ frontend_system_parameters.FRONTEND_DISTRIBUTION_ID }}"
+              - --paths
+              - "/*"
+          environment: "{{ aws_environment }}"
+
+        - name: Resolve frontend CloudFront domain
+          ansible.builtin.command:
+            argv:
+              - aws
+              - cloudfront
+              - get-distribution
+              - --id
+              - "{{ frontend_system_parameters.FRONTEND_DISTRIBUTION_ID }}"
+              - --query
+              - Distribution.DomainName
+              - --output
+              - text
+          environment: "{{ aws_environment }}"
+          register: frontend_system_domain
+          changed_when: false
+
+        - name: Show frontend deployment summary
+          ansible.builtin.debug:
+            msg:
+              - "Frontend URL: https://{{ frontend_system_domain.stdout }}"
+              - "S3 bucket: {{ frontend_system_parameters.FRONTEND_BUCKET_NAME }}"
+              - "CloudFront distribution ID: {{ frontend_system_parameters.FRONTEND_DISTRIBUTION_ID }}"
+
+      always:
+        - name: Clean frontend workspace
+          ansible.builtin.file:
+            path: "{{ frontend_system_dir }}"
+            state: absent
