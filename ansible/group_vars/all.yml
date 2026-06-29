@@ -1,0 +1,19 @@
+aws_profile: "{{ lookup('env', 'AWS_PROFILE') | default('iac', true) }}"
+aws_region: "{{ lookup('env', 'AWS_REGION') | default('us-east-1', true) }}"
+name_prefix: "{{ lookup('env', 'NAME_PREFIX') | default('telar-dev', true) }}"
+
+workspace_root: "{{ lookup('env', 'TELAR_DEPLOY_WORKSPACE') | default('/tmp/telar-deploy', true) }}"
+
+backend_repo_url: "https://github.com/devEddu17x/telar-backend-api.git"
+backend_branch: "{{ lookup('env', 'BACKEND_BRANCH') | default('develop', true) }}"
+
+frontend_system_repo_url: "https://github.com/devEddu17x/telar-front.git"
+frontend_system_branch: "{{ lookup('env', 'FRONTEND_SYSTEM_BRANCH') | default('develop', true) }}"
+
+landing_page_repo_url: "https://github.com/gosthdev/telar-landingpage.git"
+landing_page_branch: "{{ lookup('env', 'LANDING_PAGE_BRANCH') | default('develop', true) }}"
+
+aws_environment:
+  AWS_PROFILE: "{{ aws_profile }}"
+  AWS_REGION: "{{ aws_region }}"
+  AWS_DEFAULT_REGION: "{{ aws_region }}"

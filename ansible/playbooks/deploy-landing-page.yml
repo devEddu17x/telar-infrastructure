@@ -1,0 +1,188 @@
+- name: Deploy landing page
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars_files:
+    - ../group_vars/all.yml
+
+  vars:
+    landing_page_dir: "{{ workspace_root }}/landing-page"
+    landing_page_ssm_names:
+      - "/{{ name_prefix }}/landing-page/NEXT_PUBLIC_REDIRECT_URL"
+      - "/{{ name_prefix }}/landing-page/LANDING_BUCKET_NAME"
+      - "/{{ name_prefix }}/landing-page/LANDING_DISTRIBUTION_ID"
+    landing_page_required_parameters:
+      - NEXT_PUBLIC_REDIRECT_URL
+      - LANDING_BUCKET_NAME
+      - LANDING_DISTRIBUTION_ID
+
+  tasks:
+    - name: Deploy landing page application
+      block:
+        - name: Validate required commands
+          ansible.builtin.command:
+            argv:
+              - "{{ item }}"
+              - "--version"
+          loop:
+            - aws
+            - git
+            - node
+            - corepack
+          changed_when: false
+
+        - name: Ensure deployment workspace exists
+          ansible.builtin.file:
+            path: "{{ workspace_root }}"
+            state: directory
+            mode: "0755"
+
+        - name: Read landing deployment parameters
+          ansible.builtin.command:
+            argv: "{{ ['aws', 'ssm', 'get-parameters', '--with-decryption', '--region', aws_region, '--output', 'json', '--names'] + landing_page_ssm_names }}"
+          environment: "{{ aws_environment }}"
+          register: landing_page_ssm_raw
+          changed_when: false
+
+        - name: Build landing parameter map
+          ansible.builtin.set_fact:
+            landing_page_parameters: "{{ landing_page_parameters | default({}) | combine({ item.Name.split('/')[-1]: item.Value }) }}"
+          loop: "{{ (landing_page_ssm_raw.stdout | from_json).Parameters }}"
+
+        - name: Validate landing parameters
+          ansible.builtin.assert:
+            that:
+              - landing_page_parameters[item] is defined
+              - landing_page_parameters[item] | length > 0
+            fail_msg: "Missing SSM parameter /{{ name_prefix }}/landing-page/{{ item }}"
+          loop: "{{ landing_page_required_parameters }}"
+
+        - name: Prepare landing workspace
+          ansible.builtin.file:
+            path: "{{ landing_page_dir }}"
+            state: absent
+
+        - name: Clone landing repository
+          ansible.builtin.git:
+            repo: "{{ landing_page_repo_url }}"
+            dest: "{{ landing_page_dir }}"
+            version: "{{ landing_page_branch }}"
+            depth: 1
+
+        - name: Enable Corepack
+          ansible.builtin.command:
+            argv:
+              - corepack
+              - enable
+          changed_when: false
+
+        - name: Install landing dependencies
+          ansible.builtin.command:
+            argv:
+              - pnpm
+              - install
+              - --frozen-lockfile
+            chdir: "{{ landing_page_dir }}"
+
+        - name: Build landing static export
+          ansible.builtin.command:
+            argv:
+              - pnpm
+              - build
+            chdir: "{{ landing_page_dir }}"
+          environment:
+            AWS_PROFILE: "{{ aws_profile }}"
+            AWS_REGION: "{{ aws_region }}"
+            AWS_DEFAULT_REGION: "{{ aws_region }}"
+            NEXT_TELEMETRY_DISABLED: "1"
+            NEXT_PUBLIC_REDIRECT_URL: "{{ landing_page_parameters.NEXT_PUBLIC_REDIRECT_URL }}"
+
+        - name: Validate landing static export
+          ansible.builtin.stat:
+            path: "{{ landing_page_dir }}/out"
+          register: landing_page_out
+
+        - name: Assert landing static export exists
+          ansible.builtin.assert:
+            that:
+              - landing_page_out.stat.isdir is defined
+              - landing_page_out.stat.isdir
+            fail_msg: "Landing build did not create {{ landing_page_dir }}/out"
+
+        - name: Upload landing static assets
+          ansible.builtin.command:
+            argv:
+              - aws
+              - s3
+              - sync
+              - "{{ landing_page_dir }}/out/"
+              - "s3://{{ landing_page_parameters.LANDING_BUCKET_NAME }}"
+              - --delete
+              - --cache-control
+              - "public, max-age=31536000, immutable"
+              - --exclude
+              - "*.html"
+              - --exclude
+              - "*.json"
+          environment: "{{ aws_environment }}"
+
+        - name: Upload landing HTML and JSON
+          ansible.builtin.command:
+            argv:
+              - aws
+              - s3
+              - sync
+              - "{{ landing_page_dir }}/out/"
+              - "s3://{{ landing_page_parameters.LANDING_BUCKET_NAME }}"
+              - --delete
+              - --cache-control
+              - "public, max-age=0, must-revalidate"
+              - --exclude
+              - "*"
+              - --include
+              - "*.html"
+              - --include
+              - "*.json"
+          environment: "{{ aws_environment }}"
+
+        - name: Invalidate landing CloudFront distribution
+          ansible.builtin.command:
+            argv:
+              - aws
+              - cloudfront
+              - create-invalidation
+              - --distribution-id
+              - "{{ landing_page_parameters.LANDING_DISTRIBUTION_ID }}"
+              - --paths
+              - "/*"
+          environment: "{{ aws_environment }}"
+
+        - name: Resolve landing CloudFront domain
+          ansible.builtin.command:
+            argv:
+              - aws
+              - cloudfront
+              - get-distribution
+              - --id
+              - "{{ landing_page_parameters.LANDING_DISTRIBUTION_ID }}"
+              - --query
+              - Distribution.DomainName
+              - --output
+              - text
+          environment: "{{ aws_environment }}"
+          register: landing_page_domain
+          changed_when: false
+
+        - name: Show landing deployment summary
+          ansible.builtin.debug:
+            msg:
+              - "Landing URL: https://{{ landing_page_domain.stdout }}"
+              - "S3 bucket: {{ landing_page_parameters.LANDING_BUCKET_NAME }}"
+              - "CloudFront distribution ID: {{ landing_page_parameters.LANDING_DISTRIBUTION_ID }}"
+
+      always:
+        - name: Clean landing workspace
+          ansible.builtin.file:
+            path: "{{ landing_page_dir }}"
+            state: absent
