@@ -1,7 +1,5 @@
 aws_region  = "us-east-1"
-aws_profile = "your-aws-profile"
+aws_profile = "iac"
 
-project_name = "your-project-name"
-environment  = "bootstrap"
-
-state_lock_table_name = "telar-saas-terraform-locks"
+project_name = "telar"
+environment  = "dev"
