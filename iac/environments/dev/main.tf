@@ -106,6 +106,7 @@ module "database" {
   backup_iam_role_arn          = module.iam.backup_role_arn
   backup_schedule              = var.db_backup_schedule
   backup_retention_days        = var.db_backup_vault_retention_days
+  backup_vault_force_destroy   = var.db_backup_vault_force_destroy
 }
 
 module "storage_balancer_logs" {
