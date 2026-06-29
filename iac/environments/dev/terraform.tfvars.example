@@ -40,17 +40,18 @@ db_name                    = "telardb"
 db_master_username         = "telar_app_user"
 db_min_capacity            = 0.5
 db_max_capacity            = 4
-db_backup_retention_period = 1
-db_backup_window           = "08:00-09:00"
-db_maintenance_window      = "sun:09:00-sun:10:00"
-db_deletion_protection     = false
-db_monitoring_interval     = 60
+db_backup_retention_period    = 1
+db_backup_window              = "08:00-09:00"
+db_backup_vault_force_destroy = true
+db_maintenance_window         = "sun:09:00-sun:10:00"
+db_deletion_protection        = false
+db_monitoring_interval        = 60
 
 db_skip_final_snapshot = true
 
 cognito_internal_auth_token = {
   value : "your_strong_auth_token_value",
-  retention_days = 7
+  retention_days = 0
 }
 
 backend_env = {

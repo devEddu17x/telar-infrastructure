@@ -1,5 +1,6 @@
 resource "aws_backup_vault" "this" {
-  name = "${var.name_prefix}-rds-backup-vault"
+  name          = "${var.name_prefix}-rds-backup-vault"
+  force_destroy = var.backup_vault_force_destroy
 
   tags = var.tags
 }

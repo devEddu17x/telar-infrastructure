@@ -177,6 +177,12 @@ variable "db_backup_vault_retention_days" {
   default     = 7
 }
 
+variable "db_backup_vault_force_destroy" {
+  description = "Delete recovery points when destroying the backup vault"
+  type        = bool
+  default     = true
+}
+
 variable "cognito_internal_auth_token" {
   description = "Internal auth token used by the backend for Cognito admin operations"
   type = object({
