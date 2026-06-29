@@ -49,7 +49,7 @@ terraform -chdir=iac/bootstrap apply
 Al terminar, consulta los valores para configurar el backend:
 
 ```bash
-terraform -chdir=iac/bootstrap output backend_config_
+terraform -chdir=iac/bootstrap output backend_config
 ```
 
 Copia el ejemplo del backend del entorno dev:
@@ -195,7 +195,13 @@ export AWS_REGION=us-east-1
 Obtén el nombre del bucket:
 
 ```bash
-STATE_BUCKET="$(terraform -chdir=iac/bootstrap output -json backend_config_ | jq -r '.bucket')"
+STATE_BUCKET="$(terraform -chdir=iac/bootstrap output -json backend_config | jq -r '.bucket')"
+```
+
+Si Terraform indica que el output `backend_config` no existe, ejecuta primero:
+
+```bash
+terraform -chdir=iac/bootstrap apply
 ```
 
 Genera el archivo con versiones y delete markers a eliminar:
