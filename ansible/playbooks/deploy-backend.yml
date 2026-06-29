@@ -1,0 +1,252 @@
+- name: Deploy backend
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars_files:
+    - ../group_vars/all.yml
+
+  vars:
+    backend_dir: "{{ workspace_root }}/backend"
+    backend_ssm_names:
+      - "/{{ name_prefix }}/backend/deploy/AWS_REGION"
+      - "/{{ name_prefix }}/backend/deploy/ECR_REPOSITORY_NAME"
+      - "/{{ name_prefix }}/backend/deploy/ECR_REPOSITORY_URL"
+      - "/{{ name_prefix }}/backend/deploy/ECS_CLUSTER_NAME"
+      - "/{{ name_prefix }}/backend/deploy/ECS_SERVICE_NAME"
+      - "/{{ name_prefix }}/backend/deploy/ECS_TASK_DEFINITION_ARN"
+    backend_required_parameters:
+      - AWS_REGION
+      - ECR_REPOSITORY_NAME
+      - ECR_REPOSITORY_URL
+      - ECS_CLUSTER_NAME
+      - ECS_SERVICE_NAME
+      - ECS_TASK_DEFINITION_ARN
+  
+  tasks:
+    - name: Deploy backend application
+      block:
+        - name: Validate required commands
+          ansible.builtin.command:
+            argv:
+              - "{{ item }}"
+              - "--version"
+          loop:
+            - aws
+            - docker
+            - git
+            - jq
+          changed_when: false
+
+        - name: Validate Docker daemon
+          ansible.builtin.command:
+            argv:
+              - docker
+              - info
+          changed_when: false
+
+        - name: Ensure deployment workspace exists
+          ansible.builtin.file:
+            path: "{{ workspace_root }}"
+            state: directory
+            mode: "0755"
+
+        - name: Read backend deployment parameters
+          ansible.builtin.command:
+            argv: "{{ ['aws', 'ssm', 'get-parameters', '--with-decryption', '--region', aws_region, '--output', 'json', '--names'] + backend_ssm_names }}"
+          environment: "{{ aws_environment }}"
+          register: backend_ssm_raw
+          changed_when: false
+
+        - name: Build backend parameter map
+          ansible.builtin.set_fact:
+            backend_parameters: "{{ backend_parameters | default({}) | combine({ item.Name.split('/')[-1]: item.Value }) }}"
+          loop: "{{ (backend_ssm_raw.stdout | from_json).Parameters }}"
+
+        - name: Validate backend parameters
+          ansible.builtin.assert:
+            that:
+              - backend_parameters[item] is defined
+              - backend_parameters[item] | length > 0
+            fail_msg: "Missing SSM parameter /{{ name_prefix }}/backend/deploy/{{ item }}"
+          loop: "{{ backend_required_parameters }}"
+
+        - name: Prepare backend workspace
+          ansible.builtin.file:
+            path: "{{ backend_dir }}"
+            state: absent
+
+        - name: Clone backend repository
+          ansible.builtin.git:
+            repo: "{{ backend_repo_url }}"
+            dest: "{{ backend_dir }}"
+            version: "{{ backend_branch }}"
+            depth: 1
+
+        - name: Resolve backend commit
+          ansible.builtin.command:
+            argv:
+              - git
+              - rev-parse
+              - HEAD
+            chdir: "{{ backend_dir }}"
+          register: backend_commit
+          changed_when: false
+
+        - name: Set backend image values
+          ansible.builtin.set_fact:
+            backend_image_tag: "{{ backend_commit.stdout }}"
+            backend_image_uri: "{{ backend_parameters.ECR_REPOSITORY_URL }}:{{ backend_commit.stdout }}"
+            backend_ecr_registry: "{{ backend_parameters.ECR_REPOSITORY_URL.split('/')[0] }}"
+
+        - name: Check backend image in Amazon ECR
+          ansible.builtin.command:
+            argv:
+              - aws
+              - ecr
+              - describe-images
+              - --repository-name
+              - "{{ backend_parameters.ECR_REPOSITORY_NAME }}"
+              - --image-ids
+              - "imageTag={{ backend_image_tag }}"
+              - --output
+              - json
+          environment: "{{ aws_environment }}"
+          register: backend_ecr_image
+          changed_when: false
+          failed_when:
+            - backend_ecr_image.rc != 0
+            - "'ImageNotFoundException' not in backend_ecr_image.stderr"
+
+        - name: Set backend image existence
+          ansible.builtin.set_fact:
+            backend_image_exists: "{{ backend_ecr_image.rc == 0 }}"
+
+        - name: Show existing backend image
+          ansible.builtin.debug:
+            msg: "Image already exists in ECR: {{ backend_image_uri }}"
+          when: backend_image_exists
+
+        - name: Log in to Amazon ECR
+          ansible.builtin.shell: |
+            set -euo pipefail
+            aws ecr get-login-password --region "{{ aws_region }}" | docker login --username AWS --password-stdin "{{ backend_ecr_registry }}"
+          args:
+            executable: /bin/bash
+          environment: "{{ aws_environment }}"
+          changed_when: false
+          when: not backend_image_exists
+
+        - name: Build backend Docker image
+          ansible.builtin.command:
+            argv:
+              - docker
+              - build
+              - --tag
+              - "{{ backend_image_uri }}"
+              - .
+            chdir: "{{ backend_dir }}"
+          when: not backend_image_exists
+
+        - name: Push backend Docker image
+          ansible.builtin.command:
+            argv:
+              - docker
+              - push
+              - "{{ backend_image_uri }}"
+          when: not backend_image_exists
+
+        - name: Resolve current ECS task definition
+          ansible.builtin.shell: |
+            set -euo pipefail
+            current_task_definition="$(aws ecs describe-services \
+              --cluster "{{ backend_parameters.ECS_CLUSTER_NAME }}" \
+              --services "{{ backend_parameters.ECS_SERVICE_NAME }}" \
+              --query "services[0].taskDefinition" \
+              --output text)"
+
+            if [ -z "$current_task_definition" ] || [ "$current_task_definition" = "None" ]; then
+              current_task_definition="{{ backend_parameters.ECS_TASK_DEFINITION_ARN }}"
+            fi
+
+            printf '%s\n' "$current_task_definition"
+          args:
+            executable: /bin/bash
+          environment: "{{ aws_environment }}"
+          register: current_task_definition
+          changed_when: false
+
+        - name: Register backend task definition revision
+          ansible.builtin.shell: |
+            set -euo pipefail
+
+            aws ecs describe-task-definition \
+              --task-definition "{{ current_task_definition.stdout }}" \
+              --query "taskDefinition" \
+              --output json > task-definition.json
+
+            jq --arg image "{{ backend_image_uri }}" '
+              .containerDefinitions |= map(.image = $image)
+              | del(
+                  .taskDefinitionArn,
+                  .revision,
+                  .status,
+                  .requiresAttributes,
+                  .compatibilities,
+                  .registeredAt,
+                  .registeredBy
+                )
+            ' task-definition.json > new-task-definition.json
+
+            aws ecs register-task-definition \
+              --cli-input-json file://new-task-definition.json \
+              --query "taskDefinition.taskDefinitionArn" \
+              --output text
+          args:
+            executable: /bin/bash
+            chdir: "{{ workspace_root }}"
+          environment: "{{ aws_environment }}"
+          register: new_task_definition
+
+        - name: Update ECS service
+          ansible.builtin.command:
+            argv:
+              - aws
+              - ecs
+              - update-service
+              - --cluster
+              - "{{ backend_parameters.ECS_CLUSTER_NAME }}"
+              - --service
+              - "{{ backend_parameters.ECS_SERVICE_NAME }}"
+              - --task-definition
+              - "{{ new_task_definition.stdout }}"
+              - --force-new-deployment
+          environment: "{{ aws_environment }}"
+
+        - name: Wait for ECS service stability
+          ansible.builtin.command:
+            argv:
+              - aws
+              - ecs
+              - wait
+              - services-stable
+              - --cluster
+              - "{{ backend_parameters.ECS_CLUSTER_NAME }}"
+              - --services
+              - "{{ backend_parameters.ECS_SERVICE_NAME }}"
+          environment: "{{ aws_environment }}"
+          changed_when: false
+
+        - name: Show backend deployment summary
+          ansible.builtin.debug:
+            msg:
+              - "Image URI: {{ backend_image_uri }}"
+              - "ECS cluster: {{ backend_parameters.ECS_CLUSTER_NAME }}"
+              - "ECS service: {{ backend_parameters.ECS_SERVICE_NAME }}"
+              - "Task definition ARN: {{ new_task_definition.stdout }}"
+
+      always:
+        - name: Clean backend workspace
+          ansible.builtin.file:
+            path: "{{ backend_dir }}"
+            state: absent
