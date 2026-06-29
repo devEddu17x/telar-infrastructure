@@ -138,3 +138,54 @@ AWS_PROFILE=iac AWS_REGION=us-east-1 NAME_PREFIX=telar-dev ansible-playbook ansi
 ```
 
 Ansible clona los repositorios en `/tmp/telar-deploy`, construye y publica los artefactos en AWS, y limpia el código clonado al finalizar.
+
+## 5. Abrir URLs desplegadas
+
+Después de aplicar Terraform y desplegar las aplicaciones con Ansible, imprime las URLs principales con estos comandos.
+
+Sistema frontend:
+
+```bash
+echo "https://$(terraform -chdir=iac/environments/dev output -raw frontend_system_domain_name)"
+```
+
+Landing page:
+
+```bash
+echo "https://$(terraform -chdir=iac/environments/dev output -raw landing_page_domain_name)"
+```
+
+Documentación Swagger del API Gateway:
+
+```bash
+echo "$(terraform -chdir=iac/environments/dev output -raw api_gateway_endpoint)/api/v1/docs"
+```
+
+También puedes imprimirlas todas juntas:
+
+```bash
+echo "System frontend: https://$(terraform -chdir=iac/environments/dev output -raw frontend_system_domain_name)"
+echo "Landing page: https://$(terraform -chdir=iac/environments/dev output -raw landing_page_domain_name)"
+echo "API docs: $(terraform -chdir=iac/environments/dev output -raw api_gateway_endpoint)/api/v1/docs"
+```
+
+## 6. Destruir el entorno
+
+Para destruir la infraestructura del entorno `dev`:
+
+```bash
+terraform -chdir=iac/environments/dev destroy
+```
+
+Si también quieres eliminar el backend remoto creado por bootstrap, destruye primero `dev` y luego elimina el bootstrap:
+
+```bash
+terraform -chdir=iac/environments/dev destroy
+terraform -chdir=iac/bootstrap destroy
+```
+
+El bucket de estado remoto tiene versioning habilitado. Si el destroy de bootstrap falla porque el bucket no está vacío, vacía las versiones del bucket desde la consola de S3 o con AWS CLI y vuelve a ejecutar:
+
+```bash
+terraform -chdir=iac/bootstrap destroy
+```
