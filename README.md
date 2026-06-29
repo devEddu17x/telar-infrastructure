@@ -9,7 +9,7 @@ Infraestructura AWS para Telar, definida con Terraform.
 - **Ansible** instalado
 - AWS CLI instalado
 - **Docker** instalado y corriendo
-- Node.js 22 instalado
+- **Node.js >= 22** instalado
 - **Corepack** habilitado
 - **pnpm** disponible mediante Corepack
 - **jq** instalado
