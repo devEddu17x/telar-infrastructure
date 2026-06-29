@@ -274,9 +274,14 @@ variable "api_cors_configuration" {
 }
 
 variable "ecs_container_image" {
-  description = "Docker image URI for the NestJS API. Leave empty to use the placeholder built from the ECR repository."
+  description = "Optional Docker image URI for the API"
   type        = string
-  default     = ""
+  default     = null
+
+  validation {
+    condition     = var.ecs_container_image == null || trimspace(var.ecs_container_image) != ""
+    error_message = "ecs_container_image must be null or a non-empty Docker image URI"
+  }
 }
 
 variable "ecs_desired_count" {

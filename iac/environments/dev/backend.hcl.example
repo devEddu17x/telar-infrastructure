@@ -1,6 +1,6 @@
-profile        = "your_profile"
-bucket         = "your-tf-state-bucket"
-key            = "your-key-to-your-tf-state"
-region         = "us-east-1"
-dynamodb_table = "your-dynamodb-table"
-encrypt        = true
+profile = "iac"
+bucket = "bucket"
+encrypt = true
+key = "telar/dev/terraform.tfstate"
+region = "us-east-1"
+use_lockfile = true
