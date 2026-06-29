@@ -112,3 +112,29 @@ terraform -chdir=iac/environments/dev apply
 ```
 
 **Durante este `apply`, Terraform ejecuta Docker localmente para publicar la imagen placeholder en ECR. Si Docker no está corriendo, el despliegue fallará en ese paso.**
+
+## 4. Configurar aplicaciones con Ansible
+
+Después de crear la infraestructura, despliega las aplicaciones reales desde sus repositorios públicos.
+
+El despliegue se ejecuta localmente. Ansible no se conecta a EC2 ni instala agentes remotos.
+
+```bash
+ansible-playbook ansible/playbooks/deploy-backend.yml
+```
+
+```bash
+ansible-playbook ansible/playbooks/deploy-frontend-system.yml
+```
+
+```bash
+ansible-playbook ansible/playbooks/deploy-landing-page.yml
+```
+
+Si usas otro perfil o región:
+
+```bash
+AWS_PROFILE=iac AWS_REGION=us-east-1 NAME_PREFIX=telar-dev ansible-playbook ansible/playbooks/deploy-backend.yml
+```
+
+Ansible clona los repositorios en `/tmp/telar-deploy`, construye y publica los artefactos en AWS, y limpia el código clonado al finalizar.
