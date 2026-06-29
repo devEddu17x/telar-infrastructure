@@ -9,7 +9,7 @@ Infraestructura AWS para Telar, definida con Terraform.
 - **Ansible** instalado
 - AWS CLI instalado
 - **Docker** instalado y corriendo
-- Node.js 22 instalado
+- **Node.js >= 22** instalado
 - **Corepack** habilitado
 - **pnpm** disponible mediante Corepack
 - **jq** instalado
@@ -49,7 +49,7 @@ terraform -chdir=iac/bootstrap apply
 Al terminar, consulta los valores para configurar el backend:
 
 ```bash
-terraform -chdir=iac/bootstrap output backend_config_
+terraform -chdir=iac/bootstrap output backend_config
 ```
 
 Copia el ejemplo del backend del entorno dev:
@@ -138,3 +138,94 @@ AWS_PROFILE=iac AWS_REGION=us-east-1 NAME_PREFIX=telar-dev ansible-playbook ansi
 ```
 
 Ansible clona los repositorios en `/tmp/telar-deploy`, construye y publica los artefactos en AWS, y limpia el código clonado al finalizar.
+
+## 5. Abrir URLs desplegadas
+
+Después de aplicar Terraform y desplegar las aplicaciones con Ansible, imprime las URLs principales con estos comandos.
+
+Sistema frontend:
+
+```bash
+echo "https://$(terraform -chdir=iac/environments/dev output -raw frontend_system_domain_name)"
+```
+
+Landing page:
+
+```bash
+echo "https://$(terraform -chdir=iac/environments/dev output -raw landing_page_domain_name)"
+```
+
+Documentación Swagger del API Gateway:
+
+```bash
+echo "$(terraform -chdir=iac/environments/dev output -raw api_gateway_endpoint)/api/v1/docs"
+```
+
+También puedes imprimirlas todas juntas:
+
+```bash
+echo "System frontend: https://$(terraform -chdir=iac/environments/dev output -raw frontend_system_domain_name)"
+echo "Landing page: https://$(terraform -chdir=iac/environments/dev output -raw landing_page_domain_name)"
+echo "API docs: $(terraform -chdir=iac/environments/dev output -raw api_gateway_endpoint)/api/v1/docs"
+```
+
+## 6. Destruir el entorno
+
+Para destruir la infraestructura del entorno `dev`:
+
+```bash
+terraform -chdir=iac/environments/dev destroy
+```
+
+Si también quieres eliminar el backend remoto creado por bootstrap, destruye primero `dev` y luego elimina el bootstrap:
+
+```bash
+terraform -chdir=iac/bootstrap destroy
+```
+
+El bucket de estado remoto tiene versioning habilitado. Si el destroy de bootstrap falla porque el bucket no está vacío, borra las versiones y delete markers por CLI.
+
+Configura el perfil y región:
+
+```bash
+export AWS_PROFILE=iac
+export AWS_REGION=us-east-1
+```
+
+Obtén el nombre del bucket:
+
+```bash
+STATE_BUCKET="$(terraform -chdir=iac/bootstrap output -json backend_config | jq -r '.bucket')"
+```
+
+Si Terraform indica que el output `backend_config` no existe, ejecuta primero:
+
+```bash
+terraform -chdir=iac/bootstrap apply
+```
+
+Genera el archivo con versiones y delete markers a eliminar:
+
+```bash
+aws s3api list-object-versions \
+  --bucket "$STATE_BUCKET" \
+  --output json \
+  | jq '{Objects: ((.Versions // []) + (.DeleteMarkers // []) | map({Key, VersionId})), Quiet: true}' \
+  > /tmp/telar-tfstate-objects.json
+```
+
+Elimina los objetos versionados si existen:
+
+```bash
+if [ "$(jq '.Objects | length' /tmp/telar-tfstate-objects.json)" -gt 0 ]; then
+  aws s3api delete-objects \
+    --bucket "$STATE_BUCKET" \
+    --delete file:///tmp/telar-tfstate-objects.json
+fi
+```
+
+Luego vuelve a ejecutar:
+
+```bash
+terraform -chdir=iac/bootstrap destroy
+```
