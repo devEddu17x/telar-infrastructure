@@ -180,11 +180,45 @@ terraform -chdir=iac/environments/dev destroy
 Si también quieres eliminar el backend remoto creado por bootstrap, destruye primero `dev` y luego elimina el bootstrap:
 
 ```bash
-terraform -chdir=iac/environments/dev destroy
 terraform -chdir=iac/bootstrap destroy
 ```
 
-El bucket de estado remoto tiene versioning habilitado. Si el destroy de bootstrap falla porque el bucket no está vacío, vacía las versiones del bucket desde la consola de S3 o con AWS CLI y vuelve a ejecutar:
+El bucket de estado remoto tiene versioning habilitado. Si el destroy de bootstrap falla porque el bucket no está vacío, borra las versiones y delete markers por CLI.
+
+Configura el perfil y región:
+
+```bash
+export AWS_PROFILE=iac
+export AWS_REGION=us-east-1
+```
+
+Obtén el nombre del bucket:
+
+```bash
+STATE_BUCKET="$(terraform -chdir=iac/bootstrap output -json backend_config_ | jq -r '.bucket')"
+```
+
+Genera el archivo con versiones y delete markers a eliminar:
+
+```bash
+aws s3api list-object-versions \
+  --bucket "$STATE_BUCKET" \
+  --output json \
+  | jq '{Objects: ((.Versions // []) + (.DeleteMarkers // []) | map({Key, VersionId})), Quiet: true}' \
+  > /tmp/telar-tfstate-objects.json
+```
+
+Elimina los objetos versionados si existen:
+
+```bash
+if [ "$(jq '.Objects | length' /tmp/telar-tfstate-objects.json)" -gt 0 ]; then
+  aws s3api delete-objects \
+    --bucket "$STATE_BUCKET" \
+    --delete file:///tmp/telar-tfstate-objects.json
+fi
+```
+
+Luego vuelve a ejecutar:
 
 ```bash
 terraform -chdir=iac/bootstrap destroy
