@@ -88,3 +88,20 @@ module "landing_github_oidc_role" {
 
   tags = local.default_tags
 }
+
+module "ses" {
+  source = "../modules/ses"
+
+  name_prefix = local.name_prefix
+
+  emails = var.ses_emails
+  domain = var.ses_domain
+
+  github_oidc_provider_arn = aws_iam_openid_connect_provider.github.arn
+  github_oidc_provider_url = replace(aws_iam_openid_connect_provider.github.url, "https://", "")
+  github_repository        = var.ses_github_repository
+  github_branches          = var.ses_github_branches
+  github_environments      = var.ses_github_environments
+
+  tags = local.default_tags
+}

@@ -11,3 +11,7 @@ frontend_github_branches     = []
 backend_github_repository   = "owner/backend-repository"
 backend_github_environments = ["dev"]
 backend_github_branches     = []
+
+ses_github_repository   = "owner/iac-repository"
+ses_github_environments = ["dev"]
+ses_github_branches     = []
