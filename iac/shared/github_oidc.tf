@@ -121,7 +121,7 @@ module "iac_github_oidc_role" {
   branches     = var.iac_github_branches
   environments = var.iac_github_environments
 
-  ses_identity_arns = [module.checkov_email.domain_identity_arn]
+  from_addresses = length(var.checkov_email_from_addresses) > 0 ? var.checkov_email_from_addresses : ["no-reply-iac@${var.checkov_email_domain}"]
 
   tags = local.default_tags
 }
