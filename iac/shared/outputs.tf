@@ -33,17 +33,27 @@ output "landing_github_oidc_role_name" {
   value       = module.landing_github_oidc_role.role_name
 }
 
-output "ses_github_actions_role_arn" {
-  description = "ARN of the IAM role for GitHub Actions to use SES"
-  value       = module.ses.email_service_arn
+output "iac_github_oidc_role_arn" {
+  description = "ARN of the IAC GitHub Actions role"
+  value       = module.iac_github_oidc_role.role_arn
 }
 
-output "ses_verified_emails" {
-  description = "List of verified SES email identities"
-  value       = module.ses.verified_emails
+output "iac_github_oidc_role_name" {
+  description = "Name of the IAC GitHub Actions role"
+  value       = module.iac_github_oidc_role.role_name
 }
 
-output "ses_verified_domain" {
-  description = "Verified SES domain identity"
-  value       = module.ses.verified_domain
+output "checkov_email_domain_identity_arn" {
+  description = "ARN of the SES domain identity"
+  value       = module.checkov_email.domain_identity_arn
+}
+
+output "checkov_email_domain" {
+  description = "SES email domain"
+  value       = aws_ses_domain_identity_verification.checkov_email.domain
+}
+
+output "checkov_email_mail_from_domain" {
+  description = "SES MAIL FROM domain"
+  value       = module.checkov_email.mail_from_domain
 }
