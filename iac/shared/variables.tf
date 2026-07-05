@@ -157,5 +157,5 @@ variable "iac_github_branches" {
 variable "iac_github_environments" {
   description = "GitHub environments allowed to send Checkov report emails"
   type        = list(string)
-  default     = []
+  default     = ["dev", "qa", "prod"]
 }
