@@ -121,7 +121,8 @@ module "iac_github_oidc_role" {
   branches     = var.iac_github_branches
   environments = var.iac_github_environments
 
-  from_addresses = length(var.checkov_email_from_addresses) > 0 ? var.checkov_email_from_addresses : ["no-reply-iac@${var.checkov_email_domain}"]
+  allow_pull_requests = var.iac_github_allow_pull_requests
+  from_addresses      = length(var.checkov_email_from_addresses) > 0 ? var.checkov_email_from_addresses : ["no-reply-iac@${var.checkov_email_domain}"]
 
   tags = local.default_tags
 }

@@ -20,8 +20,9 @@ checkov_email_mail_from_subdomain = "ses"
 checkov_email_dmarc_report_email  = null
 checkov_email_manage_domain_spf   = false
 checkov_email_manage_dmarc        = false
-checkov_email_from_addresses      = ["no-reply-iac@domain"]
+checkov_email_from_addresses      = ["no-reply-iac@eddux.dev"]
 
-iac_github_repository   = "devEddu17x/telar-infrastructure"
-iac_github_environments = ["dev", "qa", "prod"]
-iac_github_branches     = ["develop", "qa", "prod"]
+iac_github_repository          = "devEddu17x/telar-infrastructure"
+iac_github_environments        = ["dev", "qa", "prod"]
+iac_github_branches            = ["develop", "qa", "prod"]
+iac_github_allow_pull_requests = true

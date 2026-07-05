@@ -165,3 +165,9 @@ variable "iac_github_environments" {
   type        = list(string)
   default     = ["dev", "qa", "prod"]
 }
+
+variable "iac_github_allow_pull_requests" {
+  description = "Allow pull request workflows to send Checkov report emails"
+  type        = bool
+  default     = true
+}
