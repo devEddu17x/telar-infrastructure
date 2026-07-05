@@ -35,8 +35,8 @@ variable "environments" {
   default     = []
 }
 
-variable "ses_identity_arns" {
-  description = "SES identity ARNs the role can send from"
+variable "from_addresses" {
+  description = "Email addresses allowed as SES senders"
   type        = list(string)
 }
 
