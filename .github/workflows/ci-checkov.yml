@@ -9,23 +9,48 @@ on:
     paths:
       - ".github/workflows/ci-checkov.yml"
       - "iac/**"
-  push:
-    branches:
-      - develop
-      - qa
-      - prod
-    paths:
-      - ".github/workflows/ci-checkov.yml"
-      - "iac/**"
 
 permissions:
   contents: read
   id-token: write
 
 jobs:
+  resolve-environment:
+    name: Resolve environment
+    runs-on: ubuntu-latest
+
+    outputs:
+      environment: ${{ steps.resolve.outputs.environment }}
+
+    steps:
+      - name: Resolve target
+        id: resolve
+        shell: bash
+        run: |
+          if [ "${{ github.base_ref }}" = "develop" ]; then
+            ENVIRONMENT="dev"
+          elif [ "${{ github.base_ref }}" = "qa" ]; then
+            ENVIRONMENT="qa"
+          elif [ "${{ github.base_ref }}" = "prod" ]; then
+            ENVIRONMENT="prod"
+          else
+            echo "Unsupported target branch: ${{ github.base_ref }}"
+            exit 1
+          fi
+
+          echo "environment=${ENVIRONMENT}" >> "$GITHUB_OUTPUT"
+
   checkov:
     name: Checkov
     runs-on: ubuntu-latest
+    needs: resolve-environment
+    environment: ${{ needs.resolve-environment.outputs.environment }}
+
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      AWS_ROLE_ARN_CHECKOV: ${{ vars.AWS_ROLE_ARN_CHECKOV }}
+      CHECKOV_REPORT_FROM: ${{ vars.CHECKOV_REPORT_FROM }}
+      CHECKOV_REPORT_RECIPIENTS: ${{ vars.CHECKOV_REPORT_RECIPIENTS }}
 
     defaults:
       run:
@@ -34,6 +59,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+
+      - name: Validate report variables
+        run: |
+          missing=0
+
+          for name in AWS_REGION AWS_ROLE_ARN_CHECKOV CHECKOV_REPORT_FROM CHECKOV_REPORT_RECIPIENTS; do
+            if [ -z "${!name}" ]; then
+              echo "$name is not configured for the '${{ needs.resolve-environment.outputs.environment }}' environment"
+              missing=1
+            fi
+          done
+
+          exit "$missing"
 
       - name: Run Checkov
         id: checkov
@@ -59,20 +97,14 @@ jobs:
       - name: Render Checkov email
         if: always() && hashFiles('results_junitxml.xml') != ''
         run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            REPORT_MODE="summary"
-          else
-            REPORT_MODE="detailed"
-          fi
-
-          node iac/services/checkov-report/render.mjs results_junitxml.xml checkov-report "$REPORT_MODE"
+          node iac/services/checkov-report/render.mjs results_junitxml.xml checkov-report summary
 
       - name: Configure AWS credentials for email
         if: always() && hashFiles('checkov-report/body.html') != ''
         uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b
         with:
-          role-to-assume: ${{ vars.AWS_ROLE_ARN_CHECKOV }}
-          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ env.AWS_ROLE_ARN_CHECKOV }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Send Checkov email
         if: always() && hashFiles('checkov-report/body.html') != ''
@@ -80,10 +112,10 @@ jobs:
           subject="$(cat checkov-report/subject.txt)"
           html="$(jq -Rs . < checkov-report/body.html)"
           text="$(jq -Rs . < checkov-report/body.txt)"
-          recipients="$(jq -Rc 'split(",") | map(gsub("^\\s+|\\s+$"; "")) | map(select(length > 0))' <<< "${{ vars.CHECKOV_REPORT_RECIPIENTS }}")"
+          recipients="$(jq -Rc 'split(",") | map(gsub("^\\s+|\\s+$"; "")) | map(select(length > 0))' <<< "${CHECKOV_REPORT_RECIPIENTS}")"
 
           jq -n \
-            --arg from "${{ vars.CHECKOV_REPORT_FROM }}" \
+            --arg from "${CHECKOV_REPORT_FROM}" \
             --arg subject "$subject" \
             --argjson html "$html" \
             --argjson text "$text" \
