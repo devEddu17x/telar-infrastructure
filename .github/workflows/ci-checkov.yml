@@ -114,6 +114,11 @@ jobs:
           text="$(jq -Rs . < checkov-report/body.txt)"
           recipients="$(jq -Rc 'split(",") | map(gsub("^\\s+|\\s+$"; "")) | map(select(length > 0))' <<< "${CHECKOV_REPORT_RECIPIENTS}")"
 
+          if [ "$(jq 'length' <<< "$recipients")" -eq 0 ]; then
+            echo "CHECKOV_REPORT_RECIPIENTS does not contain any recipient"
+            exit 1
+          fi
+
           jq -n \
             --arg from "${CHECKOV_REPORT_FROM}" \
             --arg subject "$subject" \
