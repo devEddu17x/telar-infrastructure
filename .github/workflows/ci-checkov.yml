@@ -1,0 +1,109 @@
+name: CI-Checkov
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - qa
+      - prod
+    paths:
+      - ".github/workflows/ci-checkov.yml"
+      - "iac/**"
+  push:
+    branches:
+      - develop
+      - qa
+      - prod
+    paths:
+      - ".github/workflows/ci-checkov.yml"
+      - "iac/**"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  checkov:
+    name: Checkov
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+
+      - name: Run Checkov
+        id: checkov
+        continue-on-error: true
+        run: |
+          docker run --rm \
+            --user "$(id -u):$(id -g)" \
+            -v "$(pwd):/repo" \
+            --workdir /repo \
+            bridgecrew/checkov:3 \
+            --directory /repo/iac \
+            -o junitxml \
+            --output-file-path /repo/
+
+      - name: Upload Checkov report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: checkov-junit-report
+          path: results_junitxml.xml
+          if-no-files-found: ignore
+
+      - name: Render Checkov email
+        if: always() && hashFiles('results_junitxml.xml') != ''
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            REPORT_MODE="summary"
+          else
+            REPORT_MODE="detailed"
+          fi
+
+          node iac/services/checkov-report/render.mjs results_junitxml.xml checkov-report "$REPORT_MODE"
+
+      - name: Configure AWS credentials for email
+        if: always() && hashFiles('checkov-report/body.html') != ''
+        uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN_CHECKOV }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Send Checkov email
+        if: always() && hashFiles('checkov-report/body.html') != ''
+        run: |
+          subject="$(cat checkov-report/subject.txt)"
+          html="$(jq -Rs . < checkov-report/body.html)"
+          text="$(jq -Rs . < checkov-report/body.txt)"
+          recipients="$(jq -Rc 'split(",") | map(gsub("^\\s+|\\s+$"; "")) | map(select(length > 0))' <<< "${{ vars.CHECKOV_REPORT_RECIPIENTS }}")"
+
+          jq -n \
+            --arg from "${{ vars.CHECKOV_REPORT_FROM }}" \
+            --arg subject "$subject" \
+            --argjson html "$html" \
+            --argjson text "$text" \
+            --argjson recipients "$recipients" \
+            '{
+              FromEmailAddress: $from,
+              Destination: { ToAddresses: $recipients },
+              Content: {
+                Simple: {
+                  Subject: { Data: $subject, Charset: "UTF-8" },
+                  Body: {
+                    Html: { Data: $html, Charset: "UTF-8" },
+                    Text: { Data: $text, Charset: "UTF-8" }
+                  }
+                }
+              }
+            }' > checkov-report/email.json
+
+          aws sesv2 send-email --cli-input-json file://checkov-report/email.json
+
+      - name: Fail on Checkov findings
+        if: steps.checkov.outcome == 'failure'
+        run: exit 1
