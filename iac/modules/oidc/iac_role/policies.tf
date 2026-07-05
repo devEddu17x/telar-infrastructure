@@ -16,7 +16,11 @@ data "aws_iam_policy_document" "assume_role" {
     condition {
       test     = "StringLike"
       variable = "${var.provider_url}:sub"
-      values   = concat([for branch in var.branches : "repo:${var.repository}:ref:refs/heads/${branch}"], [for environment in var.environments : "repo:${var.repository}:environment:${environment}"])
+      values = concat(
+        [for branch in var.branches : "repo:${var.repository}:ref:refs/heads/${branch}"],
+        [for environment in var.environments : "repo:${var.repository}:environment:${environment}"],
+        var.allow_pull_requests ? ["repo:${var.repository}:pull_request"] : []
+      )
     }
   }
 }

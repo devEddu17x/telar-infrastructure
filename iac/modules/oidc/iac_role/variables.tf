@@ -35,6 +35,12 @@ variable "environments" {
   default     = []
 }
 
+variable "allow_pull_requests" {
+  description = "Allow pull request workflows to assume the role"
+  type        = bool
+  default     = false
+}
+
 variable "from_addresses" {
   description = "Email addresses allowed as SES senders"
   type        = list(string)
