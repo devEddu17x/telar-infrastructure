@@ -12,6 +12,15 @@ backend_github_repository   = "owner/backend-repository"
 backend_github_environments = ["dev"]
 backend_github_branches     = []
 
-ses_github_repository   = "owner/iac-repository"
-ses_github_environments = ["dev"]
-ses_github_branches     = []
+cloudflare_api_token = "your-cloudflare-api-token"
+cloudflare_zone_id   = "your-cloudflare-zone-id"
+
+checkov_email_domain              = "eddux.dev"
+checkov_email_mail_from_subdomain = "ses"
+checkov_email_dmarc_report_email  = null
+checkov_email_manage_domain_spf   = false
+checkov_email_manage_dmarc        = false
+
+iac_github_repository   = "devEddu17x/telar-infrastructure"
+iac_github_environments = ["dev", "qa", "prod"]
+iac_github_branches     = ["develop", "qa", "prod"]
