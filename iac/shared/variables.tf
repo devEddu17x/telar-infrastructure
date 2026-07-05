@@ -142,6 +142,12 @@ variable "checkov_email_manage_dmarc" {
   default     = false
 }
 
+variable "checkov_email_from_addresses" {
+  description = "Email addresses allowed to send Checkov reports"
+  type        = list(string)
+  default     = []
+}
+
 variable "iac_github_repository" {
   description = "GitHub repository allowed to send Checkov report emails"
   type        = string
