@@ -28,6 +28,12 @@ data "aws_iam_policy_document" "deploy" {
       "ses:SendEmail",
       "ses:SendRawEmail",
     ]
-    resources = var.ses_identity_arns
+    resources = ["*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "ses:FromAddress"
+      values   = var.from_addresses
+    }
   }
 }
