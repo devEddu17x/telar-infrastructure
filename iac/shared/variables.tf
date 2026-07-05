@@ -102,30 +102,72 @@ variable "landing_parameter_path" {
   default     = "landing-page"
 }
 
-variable "ses_emails" {
-  description = "List of email addresses to verify in SES"
-  type        = list(string)
-}
-
-variable "ses_domain" {
-  description = "Domain to verify in SES (optional)"
+variable "cloudflare_api_token" {
+  description = "Cloudflare API token used to manage DNS records"
   type        = string
-  default     = ""
+  sensitive   = true
 }
 
-variable "ses_github_repository" {
-  description = "GitHub repository allowed to assume the SES role"
+variable "cloudflare_zone_id" {
+  description = "Cloudflare zone ID for the email domain"
   type        = string
 }
 
-variable "ses_github_branches" {
-  description = "Git branches allowed to assume the SES role"
+variable "checkov_email_domain" {
+  description = "Domain used to send Checkov report emails"
+  type        = string
+}
+
+variable "checkov_email_mail_from_subdomain" {
+  description = "Subdomain used as the SES MAIL FROM domain"
+  type        = string
+  default     = "ses"
+}
+
+variable "checkov_email_dmarc_report_email" {
+  description = "Email address that receives DMARC aggregate reports"
+  type        = string
+  default     = null
+}
+
+variable "checkov_email_manage_domain_spf" {
+  description = "Manage the root domain SPF record for SES"
+  type        = bool
+  default     = false
+}
+
+variable "checkov_email_manage_dmarc" {
+  description = "Manage the root domain DMARC record"
+  type        = bool
+  default     = false
+}
+
+variable "checkov_email_from_addresses" {
+  description = "Email addresses allowed to send Checkov reports"
   type        = list(string)
   default     = []
 }
 
-variable "ses_github_environments" {
-  description = "GitHub environments allowed to assume the SES role"
+variable "iac_github_repository" {
+  description = "GitHub repository allowed to send Checkov report emails"
+  type        = string
+  default     = "devEddu17x/telar-infrastructure"
+}
+
+variable "iac_github_branches" {
+  description = "Git branches allowed to send Checkov report emails"
   type        = list(string)
-  default     = ["dev"]
+  default     = ["develop", "qa", "prod"]
+}
+
+variable "iac_github_environments" {
+  description = "GitHub environments allowed to send Checkov report emails"
+  type        = list(string)
+  default     = ["dev", "qa", "prod"]
+}
+
+variable "iac_github_allow_pull_requests" {
+  description = "Allow pull request workflows to send Checkov report emails"
+  type        = bool
+  default     = true
 }

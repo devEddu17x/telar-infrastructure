@@ -89,19 +89,40 @@ module "landing_github_oidc_role" {
   tags = local.default_tags
 }
 
-module "ses" {
-  source = "../modules/ses"
+module "checkov_email" {
+  source = "../modules/email/ses_domain"
 
-  name_prefix = local.name_prefix
+  domain              = var.checkov_email_domain
+  mail_from_subdomain = var.checkov_email_mail_from_subdomain
+}
 
-  emails = var.ses_emails
-  domain = var.ses_domain
+module "checkov_email_dns" {
+  source = "../modules/dns/cloudflare_email"
 
-  github_oidc_provider_arn = aws_iam_openid_connect_provider.github.arn
-  github_oidc_provider_url = replace(aws_iam_openid_connect_provider.github.url, "https://", "")
-  github_repository        = var.ses_github_repository
-  github_branches          = var.ses_github_branches
-  github_environments      = var.ses_github_environments
+  zone_id                = var.cloudflare_zone_id
+  domain                 = module.checkov_email.domain
+  ses_verification_token = module.checkov_email.verification_token
+  ses_dkim_tokens        = module.checkov_email.dkim_tokens
+  mail_from_domain       = module.checkov_email.mail_from_domain
+  aws_region             = var.aws_region
+  dmarc_report_email     = var.checkov_email_dmarc_report_email
+  manage_domain_spf      = var.checkov_email_manage_domain_spf
+  manage_dmarc           = var.checkov_email_manage_dmarc
+}
+
+module "iac_github_oidc_role" {
+  source = "../modules/oidc/iac_role"
+
+  name_prefix  = local.name_prefix
+  role_suffix  = "iac-checkov"
+  provider_arn = aws_iam_openid_connect_provider.github.arn
+  provider_url = replace(aws_iam_openid_connect_provider.github.url, "https://", "")
+  repository   = var.iac_github_repository
+  branches     = var.iac_github_branches
+  environments = var.iac_github_environments
+
+  allow_pull_requests = var.iac_github_allow_pull_requests
+  from_addresses      = length(var.checkov_email_from_addresses) > 0 ? var.checkov_email_from_addresses : ["no-reply-iac@${var.checkov_email_domain}"]
 
   tags = local.default_tags
 }

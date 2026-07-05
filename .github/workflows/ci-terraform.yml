@@ -7,7 +7,7 @@ on:
       - qa
       - prod
     paths:
-      - ".github/workflows/ci.yml"
+      - ".github/workflows/ci-terraform.yml"
       - "iac/**"
 
 permissions:
@@ -34,7 +34,13 @@ jobs:
       - name: Select environment
         id: env
         run: |
-          case "${{ github.base_ref }}" in
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            TARGET_REF="${{ github.base_ref }}"
+          else
+            TARGET_REF="${{ github.ref_name }}"
+          fi
+
+          case "$TARGET_REF" in
             develop)
               echo "name=dev" >> "$GITHUB_OUTPUT"
               ;;
@@ -45,7 +51,7 @@ jobs:
               echo "name=prod" >> "$GITHUB_OUTPUT"
               ;;
             *)
-              echo "Unsupported base branch: ${{ github.base_ref }}" >&2
+              echo "Unsupported ref: $TARGET_REF" >&2
               exit 1
               ;;
           esac
