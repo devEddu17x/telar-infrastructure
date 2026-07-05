@@ -32,3 +32,18 @@ output "landing_github_oidc_role_name" {
   description = "Name of the landing page deployment role"
   value       = module.landing_github_oidc_role.role_name
 }
+
+output "ses_github_actions_role_arn" {
+  description = "ARN of the IAM role for GitHub Actions to use SES"
+  value       = module.ses.email_service_arn
+}
+
+output "ses_verified_emails" {
+  description = "List of verified SES email identities"
+  value       = module.ses.verified_emails
+}
+
+output "ses_verified_domain" {
+  description = "Verified SES domain identity"
+  value       = module.ses.verified_domain
+}

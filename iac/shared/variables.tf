@@ -101,3 +101,31 @@ variable "landing_parameter_path" {
   type        = string
   default     = "landing-page"
 }
+
+variable "ses_emails" {
+  description = "List of email addresses to verify in SES"
+  type        = list(string)
+}
+
+variable "ses_domain" {
+  description = "Domain to verify in SES (optional)"
+  type        = string
+  default     = ""
+}
+
+variable "ses_github_repository" {
+  description = "GitHub repository allowed to assume the SES role"
+  type        = string
+}
+
+variable "ses_github_branches" {
+  description = "Git branches allowed to assume the SES role"
+  type        = list(string)
+  default     = []
+}
+
+variable "ses_github_environments" {
+  description = "GitHub environments allowed to assume the SES role"
+  type        = list(string)
+  default     = ["dev"]
+}
