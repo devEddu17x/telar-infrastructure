@@ -22,7 +22,7 @@
       - ECS_CLUSTER_NAME
       - ECS_SERVICE_NAME
       - ECS_TASK_DEFINITION_ARN
-  
+
   tasks:
     - name: Deploy backend application
       block:
