@@ -53,4 +53,3 @@ variable "lambda_pre_signup_secrets_manager_arns" {
     error_message = "Provide explicit Secrets Manager ARNs for the Lambda Pre Sign-up Role; \"*\" is not allowed."
   }
 }
-
