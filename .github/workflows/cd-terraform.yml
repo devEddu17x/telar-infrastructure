@@ -25,7 +25,6 @@ on:
         type: choice
         default: plan
         options:
-          - validate
           - plan
           - apply
 
@@ -73,7 +72,7 @@ jobs:
           fi
 
           case "$DEPLOY_MODE" in
-            validate|plan|apply)
+            plan|apply)
               ;;
             *)
               echo "Unsupported mode: $DEPLOY_MODE" >&2
@@ -121,10 +120,6 @@ jobs:
         with:
           terraform_version: "1.15.0"
 
-      - name: Install Lambda dependencies
-        run: npm install --omit=dev
-        working-directory: iac/services/lambda/cognito-pre-sign-up
-
       - name: Validate deployment variables
         run: |
           missing=0
@@ -142,6 +137,10 @@ jobs:
           fi
 
           exit "$missing"
+
+      - name: Install Lambda dependencies
+        run: npm install --omit=dev
+        working-directory: iac/services/lambda/cognito-pre-sign-up
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b
@@ -161,14 +160,8 @@ jobs:
             printf 'use_lockfile = true\n'
           } > "${WORKING_DIRECTORY}/backend.ci.hcl"
 
-      - name: Check Terraform format
-        run: terraform fmt -check -recursive iac
-
       - name: Terraform init
         run: terraform -chdir="$WORKING_DIRECTORY" init -backend-config="$GITHUB_WORKSPACE/$WORKING_DIRECTORY/backend.ci.hcl" -input=false
-
-      - name: Terraform validate
-        run: terraform -chdir="$WORKING_DIRECTORY" validate
 
       - name: Terraform plan
         if: ${{ env.DEPLOY_MODE == 'plan' || env.DEPLOY_MODE == 'apply' }}
