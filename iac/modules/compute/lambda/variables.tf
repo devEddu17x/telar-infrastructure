@@ -42,3 +42,10 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "enable_code_signing" {
+  description = "Enable code signing for the Lambda function. Note: requires the zip file to be signed before deployment."
+  type        = bool
+  default     = false
+}
+
