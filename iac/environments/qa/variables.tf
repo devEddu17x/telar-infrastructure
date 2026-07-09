@@ -60,6 +60,13 @@ variable "s3_images_cors" {
 }
 
 
+variable "ecr_force_delete" {
+  description = "Allow repository deletion with images"
+  type        = bool
+  default     = true
+}
+
+
 variable "firewall_rate_limits" {
   description = "Each entry creates one rule and one regex pattern set."
   type = list(object({
@@ -138,7 +145,7 @@ variable "db_maintenance_window" {
 variable "db_deletion_protection" {
   description = "Protect the cluster from accidental deletion"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "db_skip_final_snapshot" {
@@ -168,4 +175,175 @@ variable "db_backup_vault_retention_days" {
   description = "Days to retain AWS Backup recovery points"
   type        = number
   default     = 7
+}
+
+variable "db_backup_vault_force_destroy" {
+  description = "Delete recovery points when destroying the backup vault"
+  type        = bool
+  default     = true
+}
+
+variable "cognito_internal_auth_token" {
+  description = "Internal auth token used by the backend for Cognito admin operations"
+  type = object({
+    value          = string
+    retention_days = number
+  })
+  sensitive = true
+}
+
+variable "backend_env" {
+  description = "Static non-sensitive backend configuration stored in SSM Parameter Store"
+  type        = map(string)
+}
+
+variable "balancer_deletion_protection" {
+  description = "Deletion protection for the ALB"
+  type        = bool
+  default     = false
+}
+
+variable "balancer_alb" {
+  description = "ALB listener configuration (port exposed to API Gateway via VPC Link)"
+  type = object({
+    port     = optional(number, 80)
+    protocol = optional(string, "HTTP")
+  })
+  default = {}
+}
+
+variable "balancer_target_group" {
+  description = "Target group configuration. Must match ECS task definition."
+  type = object({
+    port        = optional(number, 3000)
+    protocol    = optional(string, "HTTP")
+    target_type = optional(string, "ip")
+  })
+  default = {}
+}
+
+variable "balancer_health_check" {
+  description = "Health check for the target group. Must match ECS task definition."
+  type = object({
+    enabled             = optional(bool, true)
+    path                = optional(string, "/health")
+    protocol            = optional(string, "HTTP")
+    port                = optional(string, "traffic-port")
+    healthy_threshold   = optional(number, 2)
+    unhealthy_threshold = optional(number, 2)
+    interval            = optional(number, 30)
+    timeout             = optional(number, 5)
+    matcher             = optional(string, "200")
+  })
+  default = {}
+}
+
+variable "balancer_deregistration_delay" {
+  description = "Delay in seconds before removing a target"
+  type        = number
+  default     = 30
+}
+
+variable "balancer_logs_force_destroy" {
+  description = "Allow bucket destruction even if it contains objects"
+  type        = bool
+}
+
+variable "api_stage" {
+  description = "API Gateway stage name"
+  type        = string
+}
+
+variable "api_prefix" {
+  description = "First path segment of the API route tree"
+  type        = string
+  default     = "api"
+}
+
+variable "api_version" {
+  description = "Version path segment of the API route tree"
+  type        = string
+  default     = "v1"
+}
+
+variable "api_cors_configuration" {
+  description = "CORS configuration for API Gateway"
+  type = object({
+    allow_credentials = optional(bool, false)
+    allow_headers     = optional(list(string), ["authorization", "content-type"])
+    allow_methods     = optional(list(string), ["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+    allow_origins     = optional(list(string), [])
+    expose_headers    = optional(list(string), [])
+    max_age           = optional(number, 300)
+  })
+  default = {}
+}
+
+variable "ecs_container_image" {
+  description = "Optional Docker image URI for the API"
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.ecs_container_image == null || trimspace(var.ecs_container_image) != ""
+    error_message = "ecs_container_image must be null or a non-empty Docker image URI"
+  }
+}
+
+variable "ecs_desired_count" {
+  description = "Initial number of ECS tasks"
+  type        = number
+  default     = 1
+}
+
+variable "ecs_task_cpu" {
+  description = "CPU units per task"
+  type        = string
+  default     = "1024"
+}
+
+variable "ecs_task_memory" {
+  description = "Memory per task"
+  type        = string
+  default     = "2048"
+}
+
+variable "ecs_auto_scaling" {
+  description = "Auto scaling configuration for ECS service"
+  type = object({
+    min         = optional(number, 1)
+    max         = optional(number, 4)
+    target      = optional(number, 70)
+    metric_type = optional(string, "ECSServiceAverageCPUUtilization")
+  })
+  default = {}
+}
+
+variable "frontend_system_static" {
+  description = "Static hosting settings for the system frontend"
+  type = object({
+    enabled       = optional(bool, true)
+    force_destroy = optional(bool, false)
+    price_class   = optional(string, "PriceClass_100")
+  })
+  default = {}
+}
+
+variable "landing_page_static" {
+  description = "Static hosting settings for the landing page"
+  type = object({
+    enabled       = optional(bool, true)
+    force_destroy = optional(bool, false)
+    price_class   = optional(string, "PriceClass_100")
+  })
+  default = {}
+}
+variable "images_static" {
+  description = "Static hosting settings for the images"
+  type = object({
+    enabled       = optional(bool, true)
+    force_destroy = optional(bool, false)
+    price_class   = optional(string, "PriceClass_100")
+  })
+  default = {}
 }
