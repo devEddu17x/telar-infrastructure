@@ -82,8 +82,6 @@ jobs:
         if: always() && hashFiles('checkov-report/body.html') != ''
         run: |
           subject="$(cat checkov-report/subject.txt)"
-          html="$(jq -Rs . < checkov-report/body.html)"
-          text="$(jq -Rs . < checkov-report/body.txt)"
           recipients="$(jq -Rc 'split(",") | map(gsub("^\\s+|\\s+$"; "")) | map(select(length > 0))' <<< "${CHECKOV_REPORT_RECIPIENTS}")"
 
           if [ "$(jq 'length' <<< "$recipients")" -eq 0 ]; then
@@ -94,9 +92,9 @@ jobs:
           jq -n \
             --arg from "${CHECKOV_REPORT_FROM}" \
             --arg subject "$subject" \
-            --argjson html "$html" \
-            --argjson text "$text" \
             --argjson recipients "$recipients" \
+            --rawfile html checkov-report/body.html \
+            --rawfile text checkov-report/body.txt \
             '{
               FromEmailAddress: $from,
               Destination: { ToAddresses: $recipients },
