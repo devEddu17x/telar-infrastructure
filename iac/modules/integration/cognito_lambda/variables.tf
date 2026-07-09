@@ -8,11 +8,6 @@ variable "cognito_user_pool_arn" {
   type        = string
 }
 
-variable "lambda_function_arn" {
-  description = "ARN of the Lambda function to invoke as a Cognito trigger"
-  type        = string
-}
-
 variable "lambda_function_name" {
   description = "Name of the Lambda function for the permission resource"
   type        = string

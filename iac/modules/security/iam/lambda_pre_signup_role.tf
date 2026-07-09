@@ -28,17 +28,6 @@ data "aws_iam_policy_document" "lambda_pre_signup_policy" {
     ]
     resources = var.lambda_pre_signup_secrets_manager_arns
   }
-
-  statement {
-    sid    = "AllowCognitoLookup"
-    effect = "Allow"
-    actions = [
-      "cognito-idp:AdminGetUser",
-      "cognito-idp:ListUsers",
-      "cognito-idp:DescribeUserPool",
-    ]
-    resources = [var.cognito_user_pool_arn]
-  }
 }
 
 resource "aws_iam_role_policy" "lambda_pre_signup" {

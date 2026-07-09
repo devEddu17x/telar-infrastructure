@@ -11,9 +11,10 @@ module "networking" {
 }
 
 module "auth" {
-  source            = "../../modules/auth"
-  name_prefix       = local.name_prefix
-  app_email_subject = var.project_name
+  source                = "../../modules/auth"
+  name_prefix           = local.name_prefix
+  app_email_subject     = var.project_name
+  pre_signup_lambda_arn = module.pre_signup_lambda.function_arn
 }
 
 module "storage_images" {
@@ -364,4 +365,35 @@ module "landing_page_parameters" {
     LANDING_DISTRIBUTION_ID  = module.cdn_landing_page.distribution_id
   }
   tags = local.default_tags
+}
+
+data "archive_file" "pre_signup_lambda" {
+  type        = "zip"
+  source_dir  = "${path.module}/../../services/lambda/cognito-pre-sign-up"
+  output_path = "${path.module}/../../services/lambda/cognito-pre-sign-up.zip"
+
+  excludes = ["package-lock.json"]
+}
+
+module "pre_signup_lambda" {
+  source           = "../../modules/compute/lambda"
+  function_name    = "${local.name_prefix}-cognito-pre-sign-up"
+  filename         = data.archive_file.pre_signup_lambda.output_path
+  source_code_hash = data.archive_file.pre_signup_lambda.output_base64sha256
+  handler          = "index.handler"
+  runtime          = "nodejs22.x"
+  role_arn         = module.iam.lambda_pre_signup_role_arn
+
+  environment_variables = {
+    PRE_SIGNUP_SECRET_ARN = module.shared_secrets.secret_arn
+  }
+
+  tags = local.default_tags
+}
+
+module "cognito_pre_signup_trigger" {
+  source                = "../../modules/integration/cognito_lambda"
+  cognito_user_pool_id  = module.auth.user_pool_id
+  cognito_user_pool_arn = module.auth.user_pool_arn
+  lambda_function_name  = module.pre_signup_lambda.function_name
 }
