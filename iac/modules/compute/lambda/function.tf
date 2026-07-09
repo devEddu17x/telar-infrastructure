@@ -36,4 +36,3 @@ resource "aws_lambda_function" "this" {
 
   tags = var.tags
 }
-
