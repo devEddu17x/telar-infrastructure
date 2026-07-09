@@ -20,14 +20,12 @@ on:
           - qa
           - prod
 
-permissions:
-  contents: read
-  id-token: write
-
 jobs:
   select-environment:
     name: Select Environment
     runs-on: ubuntu-latest
+    permissions:
+      contents: none
 
     outputs:
       name: ${{ steps.env.outputs.name }}
@@ -68,6 +66,9 @@ jobs:
     name: Terraform Apply
     runs-on: ubuntu-latest
     needs: select-environment
+    permissions:
+      contents: read
+      id-token: write
     environment: ${{ needs.select-environment.outputs.name }}
     concurrency:
       group: terraform-${{ needs.select-environment.outputs.name }}
