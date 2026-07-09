@@ -392,8 +392,8 @@ module "pre_signup_lambda" {
 }
 
 module "cognito_pre_signup_trigger" {
-  source               = "../../modules/integration/cognito_lambda"
-  cognito_user_pool_id = module.auth.user_pool_id
+  source                = "../../modules/integration/cognito_lambda"
+  cognito_user_pool_id  = module.auth.user_pool_id
   cognito_user_pool_arn = module.auth.user_pool_arn
-  lambda_function_name = module.pre_signup_lambda.function_name
+  lambda_function_name  = module.pre_signup_lambda.function_name
 }
