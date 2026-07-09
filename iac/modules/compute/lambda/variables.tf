@@ -48,4 +48,3 @@ variable "enable_code_signing" {
   type        = bool
   default     = false
 }
-
