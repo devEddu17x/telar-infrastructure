@@ -1,8 +1,8 @@
 aws_region  = "us-east-1"
-aws_profile = "your-aws-profile"
+aws_profile = "iac"
 
-project_name = "your-project-name"
-environment  = "dev"
+project_name = "telar"
+environment  = "qa"
 
 vpc_cidr           = "10.0.0.0/16"
 availability_zones = ["us-east-1c", "us-east-1d"]
@@ -14,21 +14,20 @@ persistence_subnet_cidrs = {
   "us-east-1c" = "10.0.2.0/24"
   "us-east-1d" = "10.0.3.0/24"
 }
-ecs_container_port = your_container_port_number
+ecs_container_port = 3000
 
-s3_images_force_destroy = true or false
+s3_images_force_destroy = true
 s3_images_cors = {
-  allowed_headers = []
-  allowed_methods = []
-  allowed_origins = []
+  allowed_headers = ["*"]
+  allowed_methods = ["GET", "PUT", "POST", "DELETE"]
+  allowed_origins = ["*"]
   max_age_seconds = 3000
 }
 
-
 firewall_rate_limits = [{
-  name           = "rate_limit_name"
+  name           = "register"
   limit          = 50
-  regex_patterns = [".*/path/to/endpoint"]
+  regex_patterns = [".*/auth/register$"]
 }]
 
 firewall_cloudwatch_metrics_enabled = false
@@ -36,14 +35,99 @@ firewall_sampled_requests_enabled   = false
 firewall_redacted_fields            = ["authorization"]
 firewall_log_destination_arns       = []
 
-
 db_engine_version          = "17.7"
-db_name                    = "your_db_name"
-db_master_username         = "your_db_master_username"
+db_name                    = "telardb"
+db_master_username         = "telar_app_user"
 db_min_capacity            = 0.5
-db_max_capacity            = 16
-db_backup_retention_period = 7
-db_backup_window           = "08:00-09:00"
-db_maintenance_window      = "sun:09:00-sun:10:00"
-db_deletion_protection     = false
-db_skip_final_snapshot     = true
+db_max_capacity            = 4
+db_backup_retention_period    = 1
+db_backup_window              = "08:00-09:00"
+db_backup_vault_force_destroy = true
+db_maintenance_window         = "sun:09:00-sun:10:00"
+db_deletion_protection        = false
+db_monitoring_interval        = 60
+
+db_skip_final_snapshot = true
+
+cognito_internal_auth_token = {
+  value : "your_strong_auth_token_value",
+  retention_days = 0
+}
+
+backend_env = {
+  NODE_ENV           = "qa"
+  API_PREFIX         = "api/v1"
+  API_PORT           = "3000"
+  AWS_COGNITO_REGION = "us-east-1"
+  DB_SSL             = "true"
+}
+
+balancer_deletion_protection = false
+balancer_alb = {
+  port     = 80
+  protocol = "HTTP"
+}
+balancer_target_group = {
+  port        = 3000
+  protocol    = "HTTP"
+  target_type = "ip"
+}
+
+balancer_health_check = {
+  enabled             = true
+  path                = "/api/v1/health"
+  protocol            = "HTTP"
+  port                = "3000"
+  healthy_threshold   = 2
+  unhealthy_threshold = 3
+  interval            = 30
+  timeout             = 5
+  matcher             = "200"
+}
+balancer_deregistration_delay = 30
+balancer_logs_force_destroy   = true
+
+api_stage   = "qa"
+api_prefix  = "api"
+api_version = "v1"
+
+api_cors_configuration = {
+  allow_credentials = true
+  allow_headers     = ["authorization", "content-type"]
+  allow_methods     = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+  allow_origins     = ["*"]
+  expose_headers    = []
+  max_age           = 300
+}
+
+ecs_desired_count = 1
+ecs_task_cpu      = "1024"
+ecs_task_memory   = "2048"
+
+ecs_auto_scaling = {
+  min = 1
+  max = 4
+}
+
+frontend_system_static = {
+  enabled            = true
+  force_destroy      = true
+  versioning_enabled = false
+  price_class        = "PriceClass_100"
+}
+
+landing_page_static = {
+  enabled            = true
+  force_destroy      = true
+  versioning_enabled = false
+  price_class        = "PriceClass_100"
+}
+
+images_static = {
+  enabled            = true
+  force_destroy      = true
+  versioning_enabled = false
+  price_class        = "PriceClass_100"
+}
+
+ecr_force_delete = true
