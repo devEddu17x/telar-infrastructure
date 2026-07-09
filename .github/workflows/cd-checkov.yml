@@ -10,14 +10,13 @@ on:
       - ".github/workflows/cd-checkov.yml"
       - "iac/**"
 
-permissions:
-  contents: read
-  id-token: write
-
 jobs:
   checkov:
     name: Checkov
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
 
     env:
       AWS_REGION: ${{ vars.AWS_REGION }}
