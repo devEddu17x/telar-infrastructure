@@ -43,6 +43,16 @@ output "iac_github_oidc_role_name" {
   value       = module.iac_github_oidc_role.role_name
 }
 
+output "iac_deploy_github_oidc_role_arn" {
+  description = "ARN of the Terraform deploy role"
+  value       = module.iac_deploy_github_oidc_role.role_arn
+}
+
+output "iac_deploy_github_oidc_role_name" {
+  description = "Name of the Terraform deploy role"
+  value       = module.iac_deploy_github_oidc_role.role_name
+}
+
 output "checkov_email_domain_identity_arn" {
   description = "ARN of the SES domain identity"
   value       = module.checkov_email.domain_identity_arn
