@@ -1,4 +1,4 @@
-output "lambda_config_id" {
-  description = "ID of the Cognito User Pool Lambda Config"
-  value       = aws_cognito_user_pool_lambda_config.pre_signup.id
+output "lambda_permission_id" {
+  description = "ID of the Lambda permission that allows Cognito to invoke the Pre Sign-up function"
+  value       = aws_lambda_permission.allow_cognito.id
 }
