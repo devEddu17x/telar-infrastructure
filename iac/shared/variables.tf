@@ -171,3 +171,27 @@ variable "iac_github_allow_pull_requests" {
   type        = bool
   default     = true
 }
+
+variable "iac_deploy_github_repository" {
+  description = "GitHub repository allowed to apply Terraform"
+  type        = string
+  default     = "devEddu17x/telar-infrastructure"
+}
+
+variable "iac_deploy_github_branches" {
+  description = "Git branches allowed to apply Terraform"
+  type        = list(string)
+  default     = ["develop", "qa", "prod"]
+}
+
+variable "iac_deploy_github_environments" {
+  description = "GitHub environments allowed to apply Terraform"
+  type        = list(string)
+  default     = ["dev", "qa", "prod"]
+}
+
+variable "iac_deploy_managed_policy_arns" {
+  description = "Managed policies attached to the Terraform deploy role"
+  type        = list(string)
+  default     = ["arn:aws:iam::aws:policy/AdministratorAccess"]
+}

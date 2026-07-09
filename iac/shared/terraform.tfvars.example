@@ -26,3 +26,8 @@ iac_github_repository          = "devEddu17x/telar-infrastructure"
 iac_github_environments        = ["dev", "qa", "prod"]
 iac_github_branches            = ["develop", "qa", "prod"]
 iac_github_allow_pull_requests = true
+
+iac_deploy_github_repository       = "devEddu17x/telar-infrastructure"
+iac_deploy_github_environments     = ["dev", "qa", "prod"]
+iac_deploy_github_branches         = ["develop", "qa", "prod"]
+iac_deploy_managed_policy_arns     = ["arn:aws:iam::aws:policy/AdministratorAccess"]
