@@ -371,8 +371,6 @@ data "archive_file" "pre_signup_lambda" {
   type        = "zip"
   source_dir  = "${path.module}/../../services/lambda/cognito-pre-sign-up"
   output_path = "${path.module}/../../services/lambda/cognito-pre-sign-up.zip"
-
-  excludes = ["package-lock.json"]
 }
 
 module "pre_signup_lambda" {
