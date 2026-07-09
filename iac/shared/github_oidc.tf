@@ -126,3 +126,20 @@ module "iac_github_oidc_role" {
 
   tags = local.default_tags
 }
+
+module "iac_deploy_github_oidc_role" {
+  source = "../modules/oidc/iac_deploy_role"
+
+  name_prefix  = local.name_prefix
+  role_suffix  = "iac-deploy"
+  provider_arn = aws_iam_openid_connect_provider.github.arn
+  provider_url = replace(aws_iam_openid_connect_provider.github.url, "https://", "")
+  repository   = var.iac_deploy_github_repository
+  branches     = var.iac_deploy_github_branches
+  environments = var.iac_deploy_github_environments
+
+  managed_policy_arns = var.iac_deploy_managed_policy_arns
+  from_addresses      = length(var.checkov_email_from_addresses) > 0 ? var.checkov_email_from_addresses : ["no-reply-iac@${var.checkov_email_domain}"]
+
+  tags = local.default_tags
+}
