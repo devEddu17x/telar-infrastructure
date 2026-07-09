@@ -1,0 +1,166 @@
+name: CD-Terraform
+
+on:
+  push:
+    branches:
+      - develop
+      - qa
+      - prod
+    paths:
+      - ".github/workflows/cd-terraform.yml"
+      - "iac/**"
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: "Environment to deploy"
+        required: true
+        type: choice
+        options:
+          - dev
+          - qa
+          - prod
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  select-environment:
+    name: Select Environment
+    runs-on: ubuntu-latest
+
+    outputs:
+      name: ${{ steps.env.outputs.name }}
+      working-directory: ${{ steps.env.outputs.working-directory }}
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Select environment
+        id: env
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TARGET_ENV="${{ inputs.target_environment }}"
+          else
+            case "${{ github.ref_name }}" in
+              develop)
+                TARGET_ENV="dev"
+                ;;
+              qa)
+                TARGET_ENV="qa"
+                ;;
+              prod)
+                TARGET_ENV="prod"
+                ;;
+              *)
+                echo "Unsupported ref: ${{ github.ref_name }}" >&2
+                exit 1
+                ;;
+            esac
+          fi
+
+          echo "name=${TARGET_ENV}" >> "$GITHUB_OUTPUT"
+          echo "working-directory=iac/environments/${TARGET_ENV}" >> "$GITHUB_OUTPUT"
+
+  terraform:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+    needs: select-environment
+    environment: ${{ needs.select-environment.outputs.name }}
+    concurrency:
+      group: terraform-${{ needs.select-environment.outputs.name }}
+      cancel-in-progress: false
+
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      AWS_ROLE_ARN_TERRAFORM_CD: ${{ vars.AWS_ROLE_ARN_TERRAFORM_CD }}
+      TF_BACKEND_BUCKET: ${{ vars.TF_BACKEND_BUCKET }}
+      TF_BACKEND_KEY: ${{ vars.TF_BACKEND_KEY }}
+      TF_BACKEND_REGION: ${{ vars.TF_BACKEND_REGION || vars.AWS_REGION }}
+      TF_VARS: ${{ secrets.TF_VARS }}
+      WORKING_DIRECTORY: ${{ needs.select-environment.outputs.working-directory }}
+      TARGET_ENVIRONMENT: ${{ needs.select-environment.outputs.name }}
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e
+        with:
+          terraform_version: "1.15.0"
+
+      - name: Install Lambda dependencies
+        run: npm install --omit=dev
+        working-directory: iac/services/lambda/cognito-pre-sign-up
+
+      - name: Validate deployment variables
+        run: |
+          missing=0
+
+          for name in AWS_REGION AWS_ROLE_ARN_TERRAFORM_CD TF_BACKEND_BUCKET TF_BACKEND_KEY TF_BACKEND_REGION TF_VARS; do
+            if [ -z "${!name}" ]; then
+              echo "$name is not configured"
+              missing=1
+            fi
+          done
+
+          if [ ! -d "$WORKING_DIRECTORY" ]; then
+            echo "$WORKING_DIRECTORY does not exist"
+            missing=1
+          fi
+
+          exit "$missing"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN_TERRAFORM_CD }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Write Terraform config
+        run: |
+          printf '%s\n' "$TF_VARS" > "${WORKING_DIRECTORY}/terraform.auto.tfvars"
+
+          {
+            printf 'bucket = "%s"\n' "$TF_BACKEND_BUCKET"
+            printf 'key = "%s"\n' "$TF_BACKEND_KEY"
+            printf 'region = "%s"\n' "$TF_BACKEND_REGION"
+            printf 'encrypt = true\n'
+            printf 'use_lockfile = true\n'
+          } > "${WORKING_DIRECTORY}/backend.ci.hcl"
+
+      - name: Check Terraform format
+        run: terraform fmt -check -recursive iac
+
+      - name: Terraform init
+        run: terraform -chdir="$WORKING_DIRECTORY" init -backend-config=backend.ci.hcl -input=false
+
+      - name: Terraform validate
+        run: terraform -chdir="$WORKING_DIRECTORY" validate
+
+      - name: Terraform plan
+        run: |
+          set -o pipefail
+          terraform -chdir="$WORKING_DIRECTORY" plan -input=false -out=tfplan -no-color | tee terraform-plan.txt
+
+      - name: Terraform apply
+        run: |
+          set -o pipefail
+          terraform -chdir="$WORKING_DIRECTORY" apply -input=false -auto-approve -no-color tfplan | tee terraform-apply.txt
+
+      - name: Upload Terraform logs
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: terraform-${{ env.TARGET_ENVIRONMENT }}-logs
+          path: |
+            terraform-plan.txt
+            terraform-apply.txt
+          if-no-files-found: ignore
