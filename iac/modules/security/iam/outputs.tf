@@ -42,3 +42,8 @@ output "backup_role_arn" {
   description = "ARN of the IAM role used by AWS Backup to protect RDS clusters (satisfies CKV2_AWS_8)"
   value       = aws_iam_role.backup.arn
 }
+
+output "grafana_role_arn" {
+  description = "ARN of the IAM role used by Amazon Managed Grafana"
+  value       = aws_iam_role.grafana.arn
+}
