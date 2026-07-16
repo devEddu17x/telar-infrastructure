@@ -197,6 +197,16 @@ variable "backend_env" {
   type        = map(string)
 }
 
+variable "grafana" {
+  description = "Amazon Managed Grafana workspace configuration"
+  type = object({
+    enabled         = optional(bool, true)
+    name            = optional(string, "")
+    grafana_version = optional(string, "12.4")
+  })
+  default = {}
+}
+
 variable "balancer_deletion_protection" {
   description = "Deletion protection for the ALB"
   type        = bool
