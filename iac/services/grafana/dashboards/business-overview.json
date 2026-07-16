@@ -1,0 +1,159 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_CLOUDWATCH",
+      "label": "CloudWatch",
+      "type": "datasource",
+      "pluginId": "cloudwatch",
+      "pluginName": "CloudWatch"
+    }
+  ],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "12.4.0"
+    },
+    {
+      "type": "datasource",
+      "id": "cloudwatch",
+      "name": "CloudWatch",
+      "version": "1.0.0"
+    }
+  ],
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Prendas creadas",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "cloudwatch", "uid": "${DS_CLOUDWATCH}" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "short" }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["sum"], "fields": "", "values": false }, "orientation": "auto", "textMode": "auto", "colorMode": "value" },
+      "targets": [{ "refId": "A", "region": "$region", "queryMode": "Logs", "logGroups": [{ "name": "$log_group" }], "expression": "stats count() as value\n| filter context = \"HTTP\" and endpoint = \"POST /api/v1/clothes\" and res.statusCode >= 200 and res.statusCode < 300" }]
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Clientes nuevos",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "cloudwatch", "uid": "${DS_CLOUDWATCH}" },
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["sum"], "fields": "", "values": false }, "colorMode": "value" },
+      "targets": [{ "refId": "A", "region": "$region", "queryMode": "Logs", "logGroups": [{ "name": "$log_group" }], "expression": "stats count() as value\n| filter context = \"HTTP\" and endpoint = \"POST /api/v1/customers\" and res.statusCode >= 200 and res.statusCode < 300" }]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Cotizaciones creadas",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "type": "cloudwatch", "uid": "${DS_CLOUDWATCH}" },
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["sum"], "fields": "", "values": false }, "colorMode": "value" },
+      "targets": [{ "refId": "A", "region": "$region", "queryMode": "Logs", "logGroups": [{ "name": "$log_group" }], "expression": "stats count() as value\n| filter context = \"HTTP\" and endpoint = \"POST /api/v1/quotes\" and res.statusCode >= 200 and res.statusCode < 300" }]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Órdenes creadas",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "cloudwatch", "uid": "${DS_CLOUDWATCH}" },
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["sum"], "fields": "", "values": false }, "colorMode": "value" },
+      "targets": [{ "refId": "A", "region": "$region", "queryMode": "Logs", "logGroups": [{ "name": "$log_group" }], "expression": "stats count() as value\n| filter context = \"HTTP\" and endpoint = \"POST /api/v1/orders\" and res.statusCode >= 200 and res.statusCode < 300" }]
+    },
+    {
+      "id": 5,
+      "type": "piechart",
+      "title": "Operaciones sobre prendas",
+      "gridPos": { "h": 9, "w": 8, "x": 0, "y": 4 },
+      "datasource": { "type": "cloudwatch", "uid": "${DS_CLOUDWATCH}" },
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "options": { "pieType": "pie", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": true }, "legend": { "displayMode": "table", "placement": "right", "values": ["value", "percent"] }, "tooltip": { "mode": "single" } },
+      "targets": [{ "refId": "A", "region": "$region", "queryMode": "Logs", "logGroups": [{ "name": "$log_group" }], "expression": "fields if(endpoint = \"POST /api/v1/clothes\", \"Creadas\", if(strcontains(endpoint, \"PATCH /api/v1/clothes/\"), \"Actualizadas\", \"Eliminadas\")) as operation\n| filter context = \"HTTP\" and (endpoint = \"POST /api/v1/clothes\" or strcontains(endpoint, \"PATCH /api/v1/clothes/\") or strcontains(endpoint, \"DELETE /api/v1/clothes/\")) and res.statusCode >= 200 and res.statusCode < 300\n| stats count() as total by operation" }]
+    },
+    {
+      "id": 6,
+      "type": "barchart",
+      "title": "Variantes e imágenes añadidas",
+      "gridPos": { "h": 9, "w": 8, "x": 8, "y": 4 },
+      "datasource": { "type": "cloudwatch", "uid": "${DS_CLOUDWATCH}" },
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "options": { "orientation": "horizontal", "xTickLabelRotation": 0, "xTickLabelSpacing": 100, "legend": { "displayMode": "hidden" }, "tooltip": { "mode": "single" } },
+      "targets": [{ "refId": "A", "region": "$region", "queryMode": "Logs", "logGroups": [{ "name": "$log_group" }], "expression": "fields if(strcontains(endpoint, \"/variants\"), \"Variantes\", \"Imagenes\") as operation\n| filter context = \"HTTP\" and strcontains(endpoint, \"POST /api/v1/clothes/\") and (strcontains(endpoint, \"/variants\") or strcontains(endpoint, \"/images\")) and res.statusCode >= 200 and res.statusCode < 300\n| stats count() as total by operation" }]
+    },
+    {
+      "id": 7,
+      "type": "piechart",
+      "title": "Operaciones sobre cotizaciones",
+      "gridPos": { "h": 9, "w": 8, "x": 16, "y": 4 },
+      "datasource": { "type": "cloudwatch", "uid": "${DS_CLOUDWATCH}" },
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "options": { "pieType": "donut", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": true }, "legend": { "displayMode": "table", "placement": "right", "values": ["value", "percent"] } },
+      "targets": [{ "refId": "A", "region": "$region", "queryMode": "Logs", "logGroups": [{ "name": "$log_group" }], "expression": "fields if(endpoint = \"POST /api/v1/quotes\", \"Creadas\", if(strcontains(endpoint, \"/cancel\"), \"Canceladas\", \"Actualizadas\")) as operation\n| filter context = \"HTTP\" and (endpoint = \"POST /api/v1/quotes\" or strcontains(endpoint, \"PUT /api/v1/quotes/\") or strcontains(endpoint, \"PATCH /api/v1/quotes/\")) and res.statusCode >= 200 and res.statusCode < 300\n| stats count() as total by operation" }]
+    },
+    {
+      "id": 8,
+      "type": "bargauge",
+      "title": "Actividad del equipo",
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 13 },
+      "datasource": { "type": "cloudwatch", "uid": "${DS_CLOUDWATCH}" },
+      "fieldConfig": { "defaults": { "unit": "short", "min": 0, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "orange", "value": 10 }, { "color": "red", "value": 50 }] } }, "overrides": [] },
+      "options": { "orientation": "horizontal", "displayMode": "gradient", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": true }, "showUnfilled": true },
+      "targets": [{ "refId": "A", "region": "$region", "queryMode": "Logs", "logGroups": [{ "name": "$log_group" }], "expression": "fields endpoint\n| filter context = \"HTTP\" and (endpoint = \"POST /api/v1/admin/employees\" or endpoint = \"DELETE /api/v1/admin/employees/{id}\" or endpoint = \"POST /api/v1/admin/employees/{id}/reactivate\" or endpoint = \"PATCH /api/v1/admin/employees/promote\" or endpoint = \"PATCH /api/v1/admin/employees/revoke\") and res.statusCode >= 200 and res.statusCode < 300\n| stats count() as operations by endpoint" }]
+    },
+    {
+      "id": 9,
+      "type": "barchart",
+      "title": "Órdenes creadas vs canceladas",
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 13 },
+      "datasource": { "type": "cloudwatch", "uid": "${DS_CLOUDWATCH}" },
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "options": { "orientation": "horizontal", "legend": { "displayMode": "hidden" }, "tooltip": { "mode": "single" } },
+      "targets": [{ "refId": "A", "region": "$region", "queryMode": "Logs", "logGroups": [{ "name": "$log_group" }], "expression": "fields if(endpoint = \"POST /api/v1/orders\", \"Creadas\", \"Canceladas\") as operation\n| filter context = \"HTTP\" and (endpoint = \"POST /api/v1/orders\" or (strcontains(endpoint, \"PATCH /api/v1/orders/\") and strcontains(endpoint, \"/cancel\"))) and res.statusCode >= 200 and res.statusCode < 300\n| stats count() as total by operation" }]
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Actividad de catálogo y clientes",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 22 },
+      "datasource": { "type": "cloudwatch", "uid": "${DS_CLOUDWATCH}" },
+      "fieldConfig": { "defaults": { "unit": "short", "custom": { "drawStyle": "line", "fillOpacity": 12, "lineWidth": 2, "showPoints": "auto" } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [{ "refId": "A", "region": "$region", "queryMode": "Logs", "logGroups": [{ "name": "$log_group" }], "expression": "fields endpoint\n| filter context = \"HTTP\" and (endpoint = \"POST /api/v1/clothes\" or endpoint = \"POST /api/v1/customers\") and res.statusCode >= 200 and res.statusCode < 300\n| stats count() as operations by bin(1d), endpoint" }]
+    }
+  ],
+  "refresh": "5m",
+  "schemaVersion": 41,
+  "tags": ["telar", "business", "backend"],
+  "templating": {
+    "list": [
+      {
+        "name": "region",
+        "label": "Region",
+        "type": "custom",
+        "query": "us-east-1",
+        "current": { "text": "us-east-1", "value": "us-east-1" },
+        "options": [{ "selected": true, "text": "us-east-1", "value": "us-east-1" }]
+      },
+      {
+        "name": "log_group",
+        "label": "Backend Log Group",
+        "type": "textbox",
+        "query": "telar-dev-api-logs",
+        "current": { "text": "telar-dev-api-logs", "value": "telar-dev-api-logs" }
+      }
+    ]
+  },
+  "time": { "from": "now-30d", "to": "now" },
+  "timezone": "browser",
+  "title": "Telar Business Overview",
+  "uid": "telar-business-overview",
+  "version": 1
+}

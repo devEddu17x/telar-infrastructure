@@ -1,0 +1,810 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_CLOUDWATCH",
+      "label": "CloudWatch",
+      "description": "Amazon Managed Grafana CloudWatch data source",
+      "type": "datasource",
+      "pluginId": "cloudwatch",
+      "pluginName": "CloudWatch"
+    }
+  ],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "12.4.0"
+    },
+    {
+      "type": "datasource",
+      "id": "cloudwatch",
+      "name": "CloudWatch",
+      "version": "1.0.0"
+    }
+  ],
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "${DS_CLOUDWATCH}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Requests",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "legend": {
+          "calcs": ["sum"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "alias": "API Gateway requests",
+          "dimensions": {
+            "ApiName": "$api_name",
+            "Stage": "$api_stage"
+          },
+          "metricName": "Count",
+          "namespace": "AWS/ApiGateway",
+          "period": "60",
+          "refId": "A",
+          "region": "$region",
+          "statistic": "Sum"
+        },
+        {
+          "alias": "ALB requests",
+          "dimensions": {
+            "LoadBalancer": "$load_balancer"
+          },
+          "metricName": "RequestCount",
+          "namespace": "AWS/ApplicationELB",
+          "period": "60",
+          "refId": "B",
+          "region": "$region",
+          "statistic": "Sum"
+        }
+      ],
+      "title": "Incoming Requests",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "${DS_CLOUDWATCH}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Errors",
+            "axisPlacement": "auto",
+            "drawStyle": "bars",
+            "fillOpacity": 40,
+            "lineWidth": 1,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "calcs": ["sum"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "alias": "API Gateway 4xx",
+          "dimensions": {
+            "ApiName": "$api_name",
+            "Stage": "$api_stage"
+          },
+          "metricName": "4XXError",
+          "namespace": "AWS/ApiGateway",
+          "period": "60",
+          "refId": "A",
+          "region": "$region",
+          "statistic": "Sum"
+        },
+        {
+          "alias": "API Gateway 5xx",
+          "dimensions": {
+            "ApiName": "$api_name",
+            "Stage": "$api_stage"
+          },
+          "metricName": "5XXError",
+          "namespace": "AWS/ApiGateway",
+          "period": "60",
+          "refId": "B",
+          "region": "$region",
+          "statistic": "Sum"
+        },
+        {
+          "alias": "ALB target 5xx",
+          "dimensions": {
+            "LoadBalancer": "$load_balancer"
+          },
+          "dimensions": {
+            "LoadBalancer": "$load_balancer",
+            "TargetGroup": "targetgroup/telar-dev-tg/a81346bce9a4895f"
+          },
+          "metricName": "HTTPCode_Target_5XX_Count",
+          "namespace": "AWS/ApplicationELB",
+          "period": "60",
+          "refId": "C",
+          "region": "$region",
+          "statistic": "Sum"
+        }
+      ],
+      "title": "HTTP Errors",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "${DS_CLOUDWATCH}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Seconds",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "showPoints": "auto"
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 0
+      },
+      "id": 3,
+      "options": {
+        "legend": {
+          "calcs": ["lastNotNull", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "alias": "API Gateway latency",
+          "dimensions": {
+            "ApiName": "$api_name",
+            "Stage": "$api_stage"
+          },
+          "metricName": "Latency",
+          "namespace": "AWS/ApiGateway",
+          "period": "60",
+          "refId": "A",
+          "region": "$region",
+          "statistic": "p95"
+        },
+        {
+          "alias": "ALB target response time",
+          "dimensions": {
+            "LoadBalancer": "$load_balancer"
+          },
+          "dimensions": {
+            "LoadBalancer": "$load_balancer",
+            "TargetGroup": "targetgroup/telar-dev-tg/a81346bce9a4895f"
+          },
+          "metricName": "TargetResponseTime",
+          "namespace": "AWS/ApplicationELB",
+          "period": "60",
+          "refId": "B",
+          "region": "$region",
+          "statistic": "p95"
+        }
+      ],
+      "title": "p95 Latency",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "${DS_CLOUDWATCH}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 8
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "alias": "Healthy targets",
+          "dimensions": {
+            "LoadBalancer": "$load_balancer"
+          },
+          "metricName": "HealthyHostCount",
+          "dimensions": {
+            "LoadBalancer": "$load_balancer",
+            "TargetGroup": "targetgroup/telar-dev-tg/a81346bce9a4895f"
+          },
+          "namespace": "AWS/ApplicationELB",
+          "period": "60",
+          "refId": "A",
+          "region": "$region",
+          "statistic": "Minimum"
+        }
+      ],
+      "title": "Healthy ALB Targets",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "${DS_CLOUDWATCH}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Percent",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 1,
+            "showPoints": "auto"
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 9,
+        "x": 6,
+        "y": 8
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": ["lastNotNull", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "alias": "CPU",
+          "dimensions": {
+            "ClusterName": "$cluster",
+            "ServiceName": "$service"
+          },
+          "metricName": "CpuUtilized",
+          "namespace": "ECS/ContainerInsights",
+          "period": "60",
+          "refId": "A",
+          "region": "$region",
+          "statistic": "Average"
+        },
+        {
+          "alias": "Memory",
+          "dimensions": {
+            "ClusterName": "$cluster",
+            "ServiceName": "$service"
+          },
+          "metricName": "MemoryUtilized",
+          "namespace": "ECS/ContainerInsights",
+          "period": "60",
+          "refId": "B",
+          "region": "$region",
+          "statistic": "Average"
+        }
+      ],
+      "title": "ECS Utilization",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "${DS_CLOUDWATCH}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Tasks",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 15,
+            "lineWidth": 1,
+            "showPoints": "auto"
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 9,
+        "x": 15,
+        "y": 8
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": ["lastNotNull"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "alias": "Desired",
+          "dimensions": {
+            "ClusterName": "$cluster",
+            "ServiceName": "$service"
+          },
+          "metricName": "DesiredTaskCount",
+          "namespace": "ECS/ContainerInsights",
+          "period": "60",
+          "refId": "A",
+          "region": "$region",
+          "statistic": "Average"
+        },
+        {
+          "alias": "Running",
+          "dimensions": {
+            "ClusterName": "$cluster",
+            "ServiceName": "$service"
+          },
+          "metricName": "RunningTaskCount",
+          "namespace": "ECS/ContainerInsights",
+          "period": "60",
+          "refId": "B",
+          "region": "$region",
+          "statistic": "Average"
+        },
+        {
+          "alias": "Pending",
+          "dimensions": {
+            "ClusterName": "$cluster",
+            "ServiceName": "$service"
+          },
+          "metricName": "PendingTaskCount",
+          "namespace": "ECS/ContainerInsights",
+          "period": "60",
+          "refId": "C",
+          "region": "$region",
+          "statistic": "Average"
+        }
+      ],
+      "title": "ECS Tasks",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "${DS_CLOUDWATCH}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Capacity",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 1,
+            "showPoints": "auto"
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 14
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": ["lastNotNull", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "alias": "Aurora capacity",
+          "dimensions": {
+            "DBClusterIdentifier": "$db_cluster"
+          },
+          "metricName": "ServerlessDatabaseCapacity",
+          "namespace": "AWS/RDS",
+          "period": "60",
+          "refId": "A",
+          "region": "$region",
+          "statistic": "Average"
+        },
+        {
+          "alias": "Aurora ACU utilization",
+          "dimensions": {
+            "DBClusterIdentifier": "$db_cluster"
+          },
+          "metricName": "ACUUtilization",
+          "namespace": "AWS/RDS",
+          "period": "60",
+          "refId": "B",
+          "region": "$region",
+          "statistic": "Average"
+        }
+      ],
+      "title": "Aurora Serverless Capacity",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "${DS_CLOUDWATCH}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Connections",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 1,
+            "showPoints": "auto"
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 14
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": ["lastNotNull", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "alias": "Database connections",
+          "dimensions": {
+            "DBClusterIdentifier": "$db_cluster"
+          },
+          "metricName": "DatabaseConnections",
+          "namespace": "AWS/RDS",
+          "period": "60",
+          "refId": "A",
+          "region": "$region",
+          "statistic": "Average"
+        }
+      ],
+      "title": "Aurora Connections",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "${DS_CLOUDWATCH}"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 21
+      },
+      "id": 9,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyJSON": true,
+        "showCommonLabels": false,
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      },
+      "targets": [
+        {
+      "expression": "fields @timestamp, reqId, req.method, endpoint, res.statusCode, responseTime, err.type, err.message, msg\n| filter context = \"HTTP\" and res.statusCode >= 500\n| sort @timestamp desc\n| limit 100",
+          "logGroups": [
+            {
+              "name": "$log_group"
+            }
+          ],
+          "queryMode": "Logs",
+          "refId": "A",
+          "region": "$region"
+        }
+      ],
+      "title": "Recent Backend 5xx Logs",
+      "type": "logs"
+    }
+  ],
+  "refresh": "1m",
+  "schemaVersion": 41,
+  "tags": ["telar", "backend", "overview"],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "us-east-1",
+          "value": "us-east-1"
+        },
+        "hide": 0,
+        "label": "Region",
+        "name": "region",
+        "options": [
+          {
+            "selected": true,
+            "text": "us-east-1",
+            "value": "us-east-1"
+          }
+        ],
+        "query": "us-east-1",
+        "type": "custom"
+      },
+      {
+        "datasource": {
+          "type": "cloudwatch",
+          "uid": "${DS_CLOUDWATCH}"
+        },
+        "definition": "dimension_values($region,AWS/ApiGateway,Count,ApiName)",
+        "includeAll": false,
+        "label": "API Gateway",
+        "name": "api_name",
+        "query": "dimension_values($region,AWS/ApiGateway,Count,ApiName)",
+        "refresh": 1,
+        "type": "query"
+      },
+      {
+        "datasource": {
+          "type": "cloudwatch",
+          "uid": "${DS_CLOUDWATCH}"
+        },
+        "definition": "dimension_values($region,AWS/ApiGateway,Count,Stage,{\"ApiName\":\"$api_name\"})",
+        "includeAll": false,
+        "label": "API Stage",
+        "name": "api_stage",
+      "query": "dimension_values($region,AWS/ApiGateway,Count,Stage,{\"ApiName\":\"$api_name\"})",
+        "refresh": 1,
+        "type": "query"
+      },
+      {
+        "datasource": {
+          "type": "cloudwatch",
+          "uid": "${DS_CLOUDWATCH}"
+        },
+        "definition": "dimension_values($region,AWS/ApplicationELB,RequestCount,LoadBalancer)",
+        "includeAll": false,
+        "label": "Load Balancer",
+        "name": "load_balancer",
+        "query": "dimension_values($region,AWS/ApplicationELB,RequestCount,LoadBalancer)",
+        "refresh": 1,
+        "type": "query"
+      },
+      {
+        "datasource": {
+          "type": "cloudwatch",
+          "uid": "${DS_CLOUDWATCH}"
+        },
+        "definition": "dimension_values($region,ECS/ContainerInsights,RunningTaskCount,ClusterName)",
+        "includeAll": false,
+        "label": "ECS Cluster",
+        "name": "cluster",
+        "query": "dimension_values($region,ECS/ContainerInsights,RunningTaskCount,ClusterName)",
+        "refresh": 1,
+        "type": "query"
+      },
+      {
+        "datasource": {
+          "type": "cloudwatch",
+          "uid": "${DS_CLOUDWATCH}"
+        },
+        "definition": "dimension_values($region,ECS/ContainerInsights,RunningTaskCount,ServiceName,{\"ClusterName\":\"$cluster\"})",
+        "includeAll": false,
+        "label": "ECS Service",
+        "name": "service",
+      "query": "dimension_values($region,ECS/ContainerInsights,RunningTaskCount,ServiceName,{\"ClusterName\":\"$cluster\"})",
+        "refresh": 1,
+        "type": "query"
+      },
+      {
+        "datasource": {
+          "type": "cloudwatch",
+          "uid": "${DS_CLOUDWATCH}"
+        },
+        "definition": "dimension_values($region,AWS/RDS,ServerlessDatabaseCapacity,DBClusterIdentifier)",
+        "includeAll": false,
+        "label": "Aurora Cluster",
+        "name": "db_cluster",
+        "query": "dimension_values($region,AWS/RDS,ServerlessDatabaseCapacity,DBClusterIdentifier)",
+        "refresh": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "telar-dev-api-logs",
+          "value": "telar-dev-api-logs"
+        },
+        "hide": 0,
+        "label": "Backend Log Group",
+        "name": "log_group",
+        "options": [
+          {
+            "selected": true,
+            "text": "telar-dev-api-logs",
+            "value": "telar-dev-api-logs"
+          }
+        ],
+        "query": "telar-dev-api-logs",
+        "type": "textbox"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Telar Infrastructure Overview",
+  "uid": "telar-infrastructure-overview",
+  "version": 1,
+  "weekStart": ""
+}
