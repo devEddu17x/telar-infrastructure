@@ -157,3 +157,18 @@ output "landing_page_parameter_names" {
   description = "SSM parameter names for the landing page"
   value       = module.landing_page_parameters.parameter_names
 }
+
+output "grafana_workspace_id" {
+  description = "Amazon Managed Grafana workspace ID"
+  value       = var.grafana.enabled ? module.grafana[0].workspace_id : null
+}
+
+output "grafana_workspace_arn" {
+  description = "Amazon Managed Grafana workspace ARN"
+  value       = var.grafana.enabled ? module.grafana[0].workspace_arn : null
+}
+
+output "grafana_workspace_endpoint" {
+  description = "Amazon Managed Grafana workspace endpoint"
+  value       = var.grafana.enabled ? module.grafana[0].workspace_endpoint : null
+}

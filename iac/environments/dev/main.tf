@@ -52,6 +52,17 @@ module "observability" {
   tags        = local.default_tags
 }
 
+module "grafana" {
+  count  = var.grafana.enabled ? 1 : 0
+  source = "../../modules/observability/grafana"
+
+  name            = var.grafana.name != "" ? var.grafana.name : "${local.name_prefix}-grafana"
+  name_prefix     = "${local.name_prefix}-grafana"
+  grafana_version = var.grafana.grafana_version
+  role_arn        = module.iam.grafana_role_arn
+  tags            = local.default_tags
+}
+
 
 module "ssm_parameters" {
   source      = "../../modules/security/ssm_parameters"

@@ -4,6 +4,12 @@ aws_profile = "iac"
 project_name = "telar"
 environment  = "dev"
 
+grafana = {
+  enabled         = true
+  name            = "telar-dev-grafana"
+  grafana_version = "12.4"
+}
+
 vpc_cidr           = "10.0.0.0/16"
 availability_zones = ["us-east-1c", "us-east-1d"]
 compute_subnet_cidrs = {
