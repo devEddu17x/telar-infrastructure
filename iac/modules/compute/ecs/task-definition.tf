@@ -26,7 +26,7 @@ resource "aws_ecs_task_definition" "api" {
       secrets     = var.secrets
 
       healthCheck = {
-        command     = ["CMD-SHELL", "node -e \"require('http').get('http://localhost:${var.container_port}${var.container_health_check.path}', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))\""]
+        command     = ["CMD-SHELL", "wget -q -O /dev/null http://localhost:${var.container_port}${var.container_health_check.path} || exit 1"]
         interval    = var.container_health_check.interval
         timeout     = var.container_health_check.timeout
         retries     = var.container_health_check.retries
