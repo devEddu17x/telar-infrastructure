@@ -181,9 +181,6 @@
         {
           "alias": "ALB target 5xx",
           "dimensions": {
-            "LoadBalancer": "$load_balancer"
-          },
-          "dimensions": {
             "LoadBalancer": "$load_balancer",
             "TargetGroup": "targetgroup/telar-dev-tg/a81346bce9a4895f"
           },
@@ -259,9 +256,6 @@
         {
           "alias": "ALB target response time",
           "dimensions": {
-            "LoadBalancer": "$load_balancer"
-          },
-          "dimensions": {
             "LoadBalancer": "$load_balancer",
             "TargetGroup": "targetgroup/telar-dev-tg/a81346bce9a4895f"
           },
@@ -325,9 +319,6 @@
       "targets": [
         {
           "alias": "Healthy targets",
-          "dimensions": {
-            "LoadBalancer": "$load_balancer"
-          },
           "metricName": "HealthyHostCount",
           "dimensions": {
             "LoadBalancer": "$load_balancer",
