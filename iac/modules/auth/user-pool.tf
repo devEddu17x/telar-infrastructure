@@ -6,8 +6,8 @@ resource "aws_cognito_user_pool" "pool" {
 
   verification_message_template {
     default_email_option = "CONFIRM_WITH_CODE"
-    email_subject        = "${var.app_email_subject} - Verify your email"
-    email_message        = "Your verification code is {####}"
+    email_subject        = "${var.app_email_subject} - Verifica tu correo"
+    email_message        = var.verification_email_message
   }
 
   password_policy {

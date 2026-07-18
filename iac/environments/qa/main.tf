@@ -11,10 +11,11 @@ module "networking" {
 }
 
 module "auth" {
-  source                = "../../modules/auth"
-  name_prefix           = local.name_prefix
-  app_email_subject     = var.project_name
-  pre_signup_lambda_arn = module.pre_signup_lambda.function_arn
+  source                     = "../../modules/auth"
+  name_prefix                = local.name_prefix
+  app_email_subject          = local.upper_project_name
+  verification_email_message = file("${path.root}/../../services/cognito/email_verification/template.html")
+  pre_signup_lambda_arn      = module.pre_signup_lambda.function_arn
 }
 
 module "storage_images" {

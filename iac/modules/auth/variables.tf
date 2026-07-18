@@ -7,7 +7,13 @@ variable "app_email_subject" {
   type        = string
   default     = "telar-saas"
 }
+variable "verification_email_message" {
+  description = "HTML body for email verification messages"
+  type        = string
+}
+
 variable "pre_signup_lambda_arn" {
   description = "ARN of the Lambda function to invoke as the Cognito Pre Sign-up trigger"
   type        = string
+  default     = null
 }
