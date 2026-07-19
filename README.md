@@ -1,4 +1,4 @@
-# telar-saas-infrastructure
+# telar-infrastructure
 
 Infraestructura AWS para Telar, definida con Terraform.
 
